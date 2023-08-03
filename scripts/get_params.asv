@@ -121,7 +121,7 @@ fprintf('Gerando sinal de chirp...\n')
 As = 0.2;
 T0 = 16;
 f0 = 1/T0;
-k1 = 0*(1/f0);  % Fica mais claro do que k1 = 0*T0
+k1 = 0*(1/f0);
 k2 = 6*(1/f0);
 dt = 2.5E-5;  % Para que a gente consiga visualizar bem
 t_range = 0:dt:T0;
