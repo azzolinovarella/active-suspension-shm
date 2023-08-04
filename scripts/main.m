@@ -1,4 +1,8 @@
-clear; clc
+clear; close all; clc
+
+set(0,'DefaultLineLineWidth', 1.5, ...
+    'DefaultAxesFontName', 'Latin Modern Math', ...
+    'DefaultAxesFontSize', 14);  
 
 %% Parametros gerais da simulaçao
 
@@ -55,59 +59,21 @@ C_obs2 = C(2, :);  % Matriz de saida do observador 2
 
 %%% Luenberger
 %%%% Polos desejados para o observador
-p_obs = 4*p;
+p_luenberger = 4*p;
 %%%% Observador 1
-Ko1_luenberger = place(A', C_obs1', p_obs)';
+Ko1_luenberger = place(A', C_obs1', p_luenberger)';
 %%%% Observador 2
-Ko2_luenberger = place(A', C_obs2', p_obs)';
+Ko2_luenberger = place(A', C_obs2', p_luenberger)';
 
 %%% UIO - Heloi
-%%%% Polos desejados para o observador  --- ENTENDER PORQUE ESTA DANDO ERRADO E REFAZER
-p_obs = 4*p;
+%%%% Polos desejados para o observador  - TODO: Problema! E*C = 0 --> Igual a Luenberger
+p_uio = 4*p;
 %%%% Observador 1
-%%%%% APENAS w(t) como sinal desconhecido
-E_obs1 = -B1*pinv(C_obs1*B1);
-H_obs1 = eye(length(E_obs1)) + E_obs1*C_obs1;
-A1_obs1 = H_obs1*A;
-Ko1_uio = place(A1_obs1', C_obs1', p_obs)';
-N_obs1 = A1_obs1 - Ko1_uio*C_obs1;
-L_obs1 = Ko1_uio - N_obs1*E_obs1;
-%%%%% AMBOS w(t) e u(t) como sinais desconhecidos
-% E_obs1 = -B*pinv(C_obs1*B);
-% H_obs1 = eye(length(E_obs1)) + E_obs1*C_obs1;
-% A1_obs1 = H_obs1*A;
-% Ko1_uio = place(A1_obs1', C_obs1', p_obs)';
-% N_obs1 = A1_obs1 - Ko1_uio*C_obs1;
-% L_obs1 = Ko1_uio - N_obs1*E_obs1;
-% %%% Observador 2
-%%%%% APENAS w(t) como sinal desconhecido
-% E_obs2 = -B1*pinv(C_obs2*B1);
-% H_obs2 = eye(length(E_obs2)) + E_obs2*C_obs2;
-% A1_obs2 = H_obs2*A;
-% Ko2_uio = place(A1_obs2', C_obs2', p_obs)';
-% N_obs2 = A1_obs2 - Ko2_uio*C_obs2;
-% L_obs2 = Ko2_uio - N_obs2*E_obs2;
-%%%%% AMBOS w(t) e u(t) como sinais desconhecidos
-% E_obs2 = -B*pinv(C_obs2*B);
-% H_obs2 = eye(length(E_obs2)) + E_obs2*C_obs2;
-% A1_obs2 = H_obs2*A;
-% Ko2_uio = place(A1_obs2', C_obs2', p_obs)';
-% N_obs2 = A1_obs2 - Ko2_uio*C_obs2;
-% L_obs2 = Ko2_uio - N_obs2*E_obs2;
-% --------------------------------------------------------------------------------------
-%%% UIO - Chen
-%%%% Polos desejados para o observador  --- ENTENDER PORQUE ESTA DANDO ERRADO E REFAZER
-% p_obs = 4*p;
-% if rank(C_obs1*B) == rank(B)
-%     H_obs1 = B*inv((C_obs1*B)'*(C_obs1*B))*(C_obs1*B)';
-%     T_obs1 = eye(length(H_obs1)) - H_obs1*C_obs1;
-%     A1_obs1 = T_obs1*A;
-%     K1_obs1 = place(A1_obs1', C_obs1', p_obs)';
-%     F_obs1 = A1_obs1 - K1_obs1*C_obs1;
-%     Ko1_uio = K1_obs1 + F_obs1*H_obs1;
-% else
-%     fprintf("!!! IMPOSSIVEL PROJETAR UIO !!!")
-% end
+[N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B1, B2, C_obs1, p_uio);  % APENAS w(t) como sinal desconhecido
+% [N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B, 0, C_obs1, p_uio);  % AMBOS w(t) e u(t) como sinais desconhecidos
+%%%% Observador 2
+[N_obs2, L_obs2, G_obs2, E_obs2, Ko2_uio] = project_uio(A, B1, B2, C_obs2, p_uio);  % APENAS w(t) como sinal desconhecido
+% [N_obs2, L_obs2, G_obs2, E_obs2, Ko2_uio] = project_uio(A, B, 0, C_obs2, p_uio);  % AMBOS w(t) e u(t) como sinais desconhecidos
 
 %%% Kalman
 % TODO 
@@ -121,26 +87,31 @@ fprintf('Gerando sinal de chirp...\n')
 As = 0.2;
 T0 = 16;
 f0 = 1/T0;
-k1 = 0*(1/f0);
+k1 = 0*(1/f0);  % Fica mais claro do que k1 = 0*T0
 k2 = 6*(1/f0);
 dt = 2.5E-5;  % Para que a gente consiga visualizar bem
-t_range = 0:dt:T0;
-% N = 2;  % Numero de periodos
-N = 1;  % Numero de periodos
+t = 0:dt:T0;
+N = 2;  % Numero de periodos
+% N = 1;  % Numero de periodos
 
 % Sinal gerado
-w = chirp(As, f0, k1, k2, t_range);
-t = t_range;
-for i=2:N
-    tt = (i-1)*T0 + t_range(2:end);
-    ww = chirp(As, f0, k1, k2, t_range(2:end));
-    w = [w, ww];
-    t = [t, tt];
-end
+[w, t] = generate_chirp(As, T0, k1, k2, t, N);
 
 % Exportando para arquivo
 wt = timeseries(w, t);
 save('../data/chirp_data.mat', 'wt', '-v7.3')
+
+% Salvando as figuras
+%%% No tempo
+fig_chirp = plot_chirp(t, w, [t(1), t(end), -As*1.1, As*1.1]);
+fig_chirp.Visible = 'off';
+print(fig_chirp,'-dpng','../figs/chirp.png', '-r600');
+%%% Na frequencia
+ii = ceil(length(t)/2);
+w_ = w(1:ii);  % Fazendo assim pois dois concatenados da bug...
+fig_mag = plot_fspec(w_, length(w_)*10, dt, [[k1*f0, k2*f0+2, -20, 1]; [k1*f0, k2*f0+2, -185, 185]], true);
+fig_mag.Visible = 'off';
+print(fig_mag,'-dpng','../figs/chirp_mag.png', '-r600');
 
 %% Ruido de mediçao e processo
 
@@ -153,22 +124,30 @@ y1 = y(:,1);
 y2 = y(:,2);
 
 % Procedimento para gerar matriz de variancia
-%%% Usando % do maximo
-% pmax = 5/100;
-% v_ry1 = (pmax*max(y1)/4)^2;
-% v_ry2 = (pmax*max(y2)/4)^2;  
-% %%% Usando SNR
 SNR = 30;  % 20dB --> Sinal eh 100x mais potente que o ruido
 % % SNR = 30;  % 30dB --> Sinal eh 1000x mais potente que o ruido
-s_ry1 = std(y1)/(10^(SNR/20));
-s_ry2 = std(y2)/(10^(SNR/20));
-v_ry1 = s_ry1^2;
-v_ry2 = s_ry2^2;
+[v_y1, v_var_y1] = generate_noise(SNR, y1);
+[v_y2, v_var_y2] = generate_noise(SNR, y2);
 
-% Gerando as variancias
-V = [v_ry1 0; 0 v_ry2];  % Variancia - Como determinar? Via SNR ou %Max?
-
-v = sqrt(V)*randn(2, length(t));
+% Gerando a matriz de covariancia
+V = cov(v_var_y1, v_var_y2); 
+v = [v_y1; v_y2];
  
 vt = timeseries(v, t);
 save('../data/measurement_noise.mat', 'vt', '-v7.3')
+
+% Salvando as figuras
+%%% Ruido 1
+fig_v1 = plot_noise(t, v(1,:), [0, 32, 1.1*min(v(1,:)), 1.1*max(v(1,:))], '1', 'm');
+fig_v1.Visible = 'off';
+print(fig_v1,'-dpng','../figs/noise_v1.png', '-r600');
+fig_v1_dist = plot_noise_dist(v(1,:),30,'1','m');
+fig_v1_dist.Visible = 'off';
+print(fig_v1_dist,'-dpng','../figs/noise_v1_dist.png', '-r600');
+%%% Ruido 2
+fig_v2 = plot_noise(t, v(2,:), [0, 32, 1.1*min(v(2,:)), 1.1*max(v(2,:))], '2', 'm/s');
+fig_v2.Visible = 'off';
+print(fig_v2,'-dpng','../figs/noise_v2.png', '-r600');
+fig_v2_dist = plot_noise_dist(v(2,:),30,'2','m/s');
+fig_v2_dist.Visible = 'off';
+print(fig_v2_dist,'-dpng','../figs/noise_v2_dist.png', '-r600');

@@ -1,4 +1,4 @@
-function plot_fspec(w, N, dt, limits, normalize)
+function fig = plot_fspec(w, N, dt, limits, normalize)
     W = fft(w, N);
     
     W_mag = abs(W);
@@ -11,12 +11,12 @@ function plot_fspec(w, N, dt, limits, normalize)
     
     f = (0:N-1)/(N*dt);
     
-    figure
+    fig = figure;
     
     ax1 = subplot(2, 1, 1);
     plot(f, W_mag);
-    title('Espectro de amplitude e fase')
-    ylabel('Amplitude (dB)')
+    % title('Espectro de Magnitude e Fase')
+    ylabel('Magnitude (dB)')
     grid on
     axis(limits(1,:))
     
