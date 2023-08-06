@@ -162,7 +162,9 @@ for i = ['0', '1', '2', '3', '4']  % Cada caso da simulacao
     sim_case = i;
     A_sim_case = eval(sprintf('A_c%s', sim_case));
 
-    [t_luenberger, x_luenberger, y_luenberger, x_hat_obs1_luenberger, x_hat_obs2_luenberger, y_hat_luenberger] = run_sim('luenberger');
-    % [t_uio, x_uio, y_uio, x_hat_obs1_uio, x_hat_obs2_uio, y_hat_uio] = run_sim('uio');
-    % [t_kalman, x_kalman, y_kalman, x_hat_obs1_kalman, x_hat_obs2_kalman, y_hat_kalman] = run_sim('kalman');
+    sim_out = sim('../simulations/luenberger');
+    t = sim_out.tout;
+    x_luenberger = sim_out.x_luenberger;
+    % sim('../simulations/uio')
+    % sim('../simulations/kalman')
 end

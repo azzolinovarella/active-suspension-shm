@@ -1,6 +1,5 @@
 function [v, v_var] = generate_noise(SNR, y)
-    s_y = std(y);
-    s_r = s_y/(10^(SNR/20));
-    v_var = s_r^2;
-    v = s_r*randn(1, length(y));
+    y_rms = rms(y);
+    v_var = (y_rms^2)/(10^(SNR/10));
+    v = sqrt(v_var)*randn(1, length(y));
 end
