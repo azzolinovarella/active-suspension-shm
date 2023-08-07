@@ -4,12 +4,6 @@ set(0,'DefaultLineLineWidth', 1.5, ...
     'DefaultAxesFontName', 'Latin Modern Math', ...
     'DefaultAxesFontSize', 14);  
 
-%% Parametros gerais da simulaçao
-
-% Condiçoes iniciais
-% CI = [1; 1; 1; 1];
-CI = [0; 0; 0; 0];
-
 %% Parametros da suspensao da quanser
 
 fprintf('Definindo parametros...\n')
@@ -105,15 +99,11 @@ save('../data/chirp_data.mat', 'wt', '-v7.3')
 
 % Salvando as figuras
 %%% No tempo
-fig_chirp = plot_chirp(t, w, [t(1), t(end), -As*1.1, As*1.1]);
-fig_chirp.Visible = 'off';
-print(fig_chirp,'-dpng','../figs/chirp.png', '-r600');
+fig_chirp = plot_chirp(t, w, [t(1), t(end), -As*1.1, As*1.1], true, '../figs/chirp.png');
 %%% Na frequencia
 ii = ceil(length(t)/2);
 w_ = w(1:ii);  % Fazendo assim pois dois concatenados da bug...
-fig_mag = plot_fspec(w_, length(w_)*10, dt, [[k1*f0, k2*f0+2, -20, 1]; [k1*f0, k2*f0+2, -185, 185]], true);
-fig_mag.Visible = 'off';
-print(fig_mag,'-dpng','../figs/chirp_mag.png', '-r600');
+fig_mag = plot_fspec(w_, length(w_)*10, dt, [k1*f0, k2*f0+2, -20, 1], [k1*f0, k2*f0+2, -185, 185], true, true, '../figs/chirp_mag.png');
 
 %% Ruido de mediçao e processo
 
@@ -140,29 +130,33 @@ save('../data/measurement_noise.mat', 'vt', '-v7.3')
 
 % Salvando as figuras
 %%% Ruido 1
-fig_v1 = plot_noise(t, v(1,:), [0, 32, 1.1*min(v(1,:)), 1.1*max(v(1,:))], '1', 'm');
-fig_v1.Visible = 'off';
-print(fig_v1,'-dpng','../figs/noise_v1.png', '-r600');
-fig_v1_dist = plot_noise_dist(v(1,:),30,'1','m');
-fig_v1_dist.Visible = 'off';
-print(fig_v1_dist,'-dpng','../figs/noise_v1_dist.png', '-r600');
+fig_v1 = plot_noise(t, v(1,:), [0, 32, 1.1*min(v(1,:)), 1.1*max(v(1,:))], '1', 'm', true, '../figs/noise_v1.png');
+fig_v1_dist = plot_noise_dist(v(1,:), 30, '1', 'm', true, '../figs/noise_v1_dist.png');
 %%% Ruido 2
-fig_v2 = plot_noise(t, v(2,:), [0, 32, 1.1*min(v(2,:)), 1.1*max(v(2,:))], '2', 'm/s');
-fig_v2.Visible = 'off';
-print(fig_v2,'-dpng','../figs/noise_v2.png', '-r600');
-fig_v2_dist = plot_noise_dist(v(2,:),30,'2','m/s');
-fig_v2_dist.Visible = 'off';
-print(fig_v2_dist,'-dpng','../figs/noise_v2_dist.png', '-r600');
+fig_v2 = plot_noise(t, v(2,:), [0, 32, 1.1*min(v(2,:)), 1.1*max(v(2,:))], '2', 'm/s', true, '../figs/noise_v2.png');
+fig_v2_dist = plot_noise_dist(v(2,:), 30, '2', 'm/s', true, '../figs/noise_v2_dist.png');
 
+% Limpando as variaveis
+clear v v_y1 v_y2 w t wt;  % Nao necessario manter isso em memoria
 %% Rodando a simulaçao
 
 fprintf('Rodando as simulaçoes...\n')
 
+% Condiçoes iniciais
+% CI = [1; 1; 1; 1];
+CI = [0; 0; 0; 0];
+
 for i = ['0', '1', '2', '3', '4']  % Cada caso da simulacao
     sim_case = i;
     A_sim_case = eval(sprintf('A_c%s', sim_case));
-
+    
     [t_luenberger, x_luenberger, y_luenberger, x_hat_obs1_luenberger, x_hat_obs2_luenberger, y_hat_luenberger] = run_sim('luenberger');
     % [t_uio, x_uio, y_uio, x_hat_obs1_uio, x_hat_obs2_uio, y_hat_uio] = run_sim('uio');
     % [t_kalman, x_kalman, y_kalman, x_hat_obs1_kalman, x_hat_obs2_kalman, y_hat_kalman] = run_sim('kalman');
+
+    % Plotagens -- TODO: CONVERTER PARA FUNÇOES DPS!
+    %%% Residuos para os diferentes casos
+    % figure('visible', 'off')
+    % title(sprintf(''))
+    %%% 
 end

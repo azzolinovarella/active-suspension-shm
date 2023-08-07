@@ -1,4 +1,10 @@
-function fig = plot_fspec(w, N, dt, limits, normalize)
+function fig = plot_fspec(w, N, dt, limits1, limits2, normalize, save, save_path)
+    if save && exist('save_path', 'var')
+        fig = figure('visible', 'off');
+    else
+        fig = figure;
+    end
+
     W = fft(w, N);
     
     W_mag = abs(W);
@@ -11,14 +17,12 @@ function fig = plot_fspec(w, N, dt, limits, normalize)
     
     f = (0:N-1)/(N*dt);
     
-    fig = figure;
-    
     ax1 = subplot(2, 1, 1);
     plot(f, W_mag);
-    % title('Espectro de Magnitude e Fase')
+    if ~save, title('Espectro de Magnitude e Fase'); end
     ylabel('Magnitude (dB)')
     grid on
-    axis(limits(1,:))
+    axis(limits1)
     
     ax2 = subplot(2, 1, 2);
     plot(f, W_phase);
@@ -28,5 +32,7 @@ function fig = plot_fspec(w, N, dt, limits, normalize)
 
     linkaxes([ax1,ax2],'x')
 
-    axis(limits(2,:))
+    axis(limits2)
+
+    if save && exist('save_path', 'var'); print(fig, '-dpng', save_path, '-r600'); end
 end
