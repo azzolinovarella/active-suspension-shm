@@ -93,11 +93,11 @@ save('../data/chirp_data.mat', 'wt', '-v7.3')
 
 % Salvando as figuras
 %%% No tempo
-fig_chirp = plot_chirp(t, w, [t(1), t(end), -As*1.1, As*1.1], true, '../figs/chirp.png');
+fig_chirp = plot_chirp(t, w, [t(1), t(end), -As*1.1, As*1.1], true, '../figs/chirp.png', false);
 %%% Na frequencia
 ii = ceil(length(t)/2);
 w_ = w(1:ii);  % Fazendo assim pois dois concatenados da bug...
-fig_mag = plot_fspec(w_, length(w_)*10, dt, [k1*f0, k2*f0+2, -20, 1], [k1*f0, k2*f0+2, -185, 185], true, true, '../figs/chirp_mag.png');
+fig_mag = plot_fspec(w_, length(w_)*10, dt, [k1*f0, k2*f0+2, -20, 1], [k1*f0, k2*f0+2, -185, 185], true, true, '../figs/chirp_mag.png', false);
 
 %% Ruido de mediçao e processo
 
@@ -124,11 +124,11 @@ save('../data/measurement_noise.mat', 'vt', '-v7.3')
 
 % Salvando as figuras
 %%% Ruido 1
-fig_v1 = plot_noise(t, v(1,:), [0, 32, 1.1*min(v(1,:)), 1.1*max(v(1,:))], '1', 'm', true, '../figs/noise_v1.png');
-fig_v1_dist = plot_noise_dist(v(1,:), 30, '1', 'm', true, '../figs/noise_v1_dist.png');
+fig_v1 = plot_noise(t, v(1,:), [0, 32, 1.1*min(v(1,:)), 1.1*max(v(1,:))], '1', 'm', true, '../figs/noise_v1.png', false);
+fig_v1_dist = plot_noise_dist(v(1,:), 30, '1', 'm', true, '../figs/noise_v1_dist.png', false);
 %%% Ruido 2
-fig_v2 = plot_noise(t, v(2,:), [0, 32, 1.1*min(v(2,:)), 1.1*max(v(2,:))], '2', 'm/s', true, '../figs/noise_v2.png');
-fig_v2_dist = plot_noise_dist(v(2,:), 30, '2', 'm/s', true, '../figs/noise_v2_dist.png');
+fig_v2 = plot_noise(t, v(2,:), [0, 32, 1.1*min(v(2,:)), 1.1*max(v(2,:))], '2', 'm/s', true, '../figs/noise_v2.png', false);
+fig_v2_dist = plot_noise_dist(v(2,:), 30, '2', 'm/s', true, '../figs/noise_v2_dist.png', false);
 
 % Limpando as variaveis
 % clear v v_y1 v_y2 w t wt;  % Nao necessario manter isso em memoria
