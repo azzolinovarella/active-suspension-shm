@@ -44,5 +44,5 @@ function fig = plot_fspec(w, N, dt, limits1, limits2, normalize, save, save_path
 
     axis(limits2)
 
-    if save && exist('save_path', 'var'); exportgraphics(fig, save_path); end
+    if save && exist('save_path', 'var'); exportgraphics(fig, save_path, 'Resolution', 600); end
 end

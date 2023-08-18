@@ -33,7 +33,6 @@ p = eig(A);  % Polos da planta
 C_obs1 = C(1, :);  % Matriz de saida do observador 1
 D_obs1 = D(1, :);
 C_obs2 = C(2, :);  % Matriz de saida do observador 2
-D_obs2 = D(2, :);
 
 %%% Luenberger
 %%%% Polos desejados para o observador

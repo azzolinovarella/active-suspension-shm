@@ -25,9 +25,9 @@ function fig = plot_noise_dist(v, n_bins, signal_ref, unit_ref, save, save_path,
         yticklabels(yticks_labels);
     end
 
-    if ~save, title(['Distribuição do ruído adicionado a y_', signal_ref, '(t)']); end
     xlabel(['Amplitude do ruído (', unit_ref, ')'])
     grid on  % Para manter o padrao...
 
-    if save && exist('save_path', 'var'); exportgraphics(fig, save_path); end
+    if ~save, title(['Distribuição do ruído adicionado a y_', signal_ref, '(t)']); end
+    if save && exist('save_path', 'var'); exportgraphics(fig, save_path, 'Resolution', 600); end
 end

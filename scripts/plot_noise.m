@@ -17,5 +17,5 @@ function fig = plot_noise(t, v, limits, signal_ref, unit_ref, save, save_path, i
         yticklabels(yticks_labels);
     end
 
-    if save && exist('save_path', 'var'); exportgraphics(fig, save_path); end
+    if save && exist('save_path', 'var'); exportgraphics(fig, save_path, 'Resolution', 600); end
 end
