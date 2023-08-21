@@ -4,6 +4,11 @@ set(0,'DefaultLineLineWidth', 1.5, ...
     'DefaultAxesFontName', 'Latin Modern Math', ...
     'DefaultAxesFontSize', 14);  
 
+% Parametros da simulaçao
+dt = 2.5E-5;  % Para que a gente consiga visualizar bem
+f_sr = 1/dt;
+T = ;
+
 %% Parametros da suspensao da quanser e matrizes do sistema
 
 fprintf('Definindo parametros e matrizes do sistema...\n')
@@ -25,14 +30,15 @@ C = [1 0 0 0; -ks/mv -bs/mv 0 bs/mv];
 D = [0; 1/mv];
 
 
-%% Projeto do observador
+%% Projeto dos observadores e do filtro
 
-fprintf('Projetando ganhos dos observadores...\n')
+fprintf('Projetando ganhos dos observadores e filtros...\n')
 
 p = eig(A);  % Polos da planta
 C_obs1 = C(1, :);  % Matriz de saida do observador 1
 D_obs1 = D(1, :);
 C_obs2 = C(2, :);  % Matriz de saida do observador 2
+D_obs2 = D(2, :);
 
 %%% Luenberger
 %%%% Polos desejados para o observador
@@ -46,14 +52,17 @@ Ko2_luenberger = place(A', C_obs2', p_luenberger)';
 %%%% Polos desejados para o observador  - TODO: Problema! E*C = 0 --> Igual a Luenberger
 p_uio = 4*p;
 %%%% Observador 1
-% [N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B1, B2, C_obs1, p_uio);  % APENAS w(t) como sinal desconhecido
-% [N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B, 0, C_obs1, p_uio);  % AMBOS w(t) e u(t) como sinais desconhecidos
+[N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B1, B2, C_obs1, p_uio);  % APENAS w(t) como sinal desconhecido
 %%%% Observador 2
 % [N_obs2, L_obs2, G_obs2, E_obs2, Ko2_uio] = project_uio(A, B1, B2, C_obs2, p_uio);  % APENAS w(t) como sinal desconhecido
-% [N_obs2, L_obs2, G_obs2, E_obs2, Ko2_uio] = project_uio(A, B, 0, C_obs2, p_uio);  % AMBOS w(t) e u(t) como sinais desconhecidos
 
 %%% Kalman
 % TODO 
+
+
+%%% Filtro passa-baixas
+[B_filter, A_filter] = butter(2, 70/(f_sr*pi), 'low');   % wc = 25 + wn2
+
 
 %% Sinal de Chirp
 
@@ -66,7 +75,6 @@ T0 = 16;
 f0 = 1/T0;
 k1 = 0*(1/f0);  % Fica mais claro do que k1 = 0*T0
 k2 = 10*(1/f0);
-dt = 2.5E-5;  % Para que a gente consiga visualizar bem
 t = 0:dt:T0;
 N = 2;  % Numero de periodos
 % N = 1;  % Numero de periodos
@@ -160,7 +168,28 @@ for i = ['1', '2', '3']  % Cada caso da simulacao
 
     % Plotagens -- TODO: CONVERTER PARA FUNÇOES DPS!
     %%% Residuos para os diferentes casos
+    y1 = y_luenberger.y1;
+    y1_hat = y_hat_luenberger.y1_hat;
+    r1 = y1 - y1_hat;
+    r1_filtered = filter(B_filter, A_filter, r1);
+    figure('visible', 'on')
+    subplot(2, 1, 1)
+    plot(t_luenberger, r1)
+    subplot(2, 1, 2)
+    plot(t_luenberger, r1_filtered)
+    
+    y2 = y_luenberger.y2;
+    y2_hat = y_hat_luenberger.y2_hat;
+    r2 = y2 - y2_hat;
+    r2_filtered = filter(B_filter, A_filter, r2);
+    figure('visible', 'on')
+    subplot(2, 1, 1)
+    plot(t_luenberger, r2)
+    subplot(2, 1, 2)
+    plot(t_luenberger, r2_filtered)
     % figure('visible', 'off')
     % title(sprintf(''))
     %%% 
+
+    
 end
