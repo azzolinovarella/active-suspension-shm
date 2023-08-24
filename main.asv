@@ -28,6 +28,38 @@ bp = 5;     % [bp] = Ns/m --> Coeficiente de amortecimento do pneu
 
 [A, B1, B2, B, C, D] = define_system(mv, ks, bs, mr, kp, bp);
 
+%% Projeto dos observadores e do filtro
+
+fprintf('Projetando ganhos dos observadores e filtros...\n')
+
+p = eig(A);  % Polos da planta
+C_obs1 = C(1, :);  % Matriz de saida do observador 1
+D_obs1 = D(1, :);
+C_obs2 = C(2, :);  % Matriz de saida do observador 2
+D_obs2 = D(2, :);
+
+%%% Luenberger
+%%%% Polos desejados para o observador
+p_luenberger = 4*p;
+%%%% Observador 1
+Ko1_luenberger = place(A', C_obs1', p_luenberger)';
+%%%% Observador 2
+Ko2_luenberger = place(A', C_obs2', p_luenberger)';
+
+%%% UIO - Heloi
+%%%% Polos desejados para o observador  - TODO: Problema! E*C = 0 --> Igual a Luenberger
+p_uio = 4*p;
+%%%% Observador 1
+[N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B1, B2, C_obs1, p_uio);  % APENAS w(t) como sinal desconhecido
+%%%% Observador 2
+% [N_obs2, L_obs2, G_obs2, E_obs2, Ko2_uio] = project_uio(A, B1, B2, C_obs2, p_uio);  % APENAS w(t) como sinal desconhecido
+
+%%% Kalman
+[Ko1_kalman, ~, ~] = lqe(A, B1, C_obs1, W, V)
+
+%%% Filtro passa-baixas
+[b_filter, a_filter] = butter(2, 75/(f_sr*pi), 'low');   % wc = 25 + wn2
+
 %% Sinal de Chirp
 
 fprintf('Gerando sinal de chirp...\n')
@@ -88,40 +120,8 @@ plot_noise_dist(v(1,:), 30, '1', 'm', true, './figs/noise_v1_dist.png');
 plot_noise(t, v(2,:), [0, 32, 1.1*min(v(2,:)), 1.1*max(v(2,:))], '2', 'm/s', true, './figs/noise_v2.png');
 plot_noise_dist(v(2,:), 30, '2', 'm/s', true, './figs/noise_v2_dist.png');
 
-%% Projeto dos observadores e do filtro
-
-fprintf('Projetando ganhos dos observadores e filtros...\n')
-
-p = eig(A);  % Polos da planta
-C_obs1 = C(1, :);  % Matriz de saida do observador 1
-D_obs1 = D(1, :);
-C_obs2 = C(2, :);  % Matriz de saida do observador 2
-D_obs2 = D(2, :);
-
-%%% Luenberger
-%%%% Polos desejados para o observador
-p_luenberger = 4*p;
-%%%% Observador 1
-Ko1_luenberger = place(A', C_obs1', p_luenberger)';
-%%%% Observador 2
-Ko2_luenberger = place(A', C_obs2', p_luenberger)';
-
-%%% UIO - Heloi
-%%%% Polos desejados para o observador  - TODO: Problema! E*C = 0 --> Igual a Luenberger
-p_uio = 4*p;
-%%%% Observador 1
-[N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B1, B2, C_obs1, p_uio);  % APENAS w(t) como sinal desconhecido
-%%%% Observador 2
-% [N_obs2, L_obs2, G_obs2, E_obs2, Ko2_uio] = project_uio(A, B1, B2, C_obs2, p_uio);  % APENAS w(t) como sinal desconhecido
-
-%%% Kalman
-%%%% Observador 1
-[Ko1_kalman, ~, ~] = lqe(A, B1, C_obs1, W, v_var_y1);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
-%%%% Observador 2
-[Ko2_kalman, ~, ~] = lqe(A, B1, C_obs2, W, v_var_y2);  % Idem
-
-%%% Filtro passa-baixas
-[b_filter, a_filter] = butter(2, 75/(f_sr*pi), 'low');   % wc = 25 + wn2
+% Limpando as variaveis
+% clear v v_y1 v_y2 w t wt;  % Nao necessario manter isso em memoria
 
 %% Diagrama de bode e simulaçao para cada caso de dano
 
@@ -144,7 +144,8 @@ CI = [0; 0; 0; 0];
 
 sys_hlt = ss(A, B1, C, D);  % Nao precisamos usar B2 (vamos analisar apenas a influencia de w)
 
-for sim_case = ['1', '2', '3']  % Cada caso da simulacao
+for i = ['1', '2', '3']  % Cada caso da simulacao
+    sim_case = i;
     A_sim_case = eval(sprintf('A_c%s', sim_case));
     B1_sim_case = eval(sprintf('B1_c%s', sim_case));
     B2_sim_case = eval(sprintf('B2_c%s', sim_case));
@@ -158,11 +159,10 @@ for sim_case = ['1', '2', '3']  % Cada caso da simulacao
     % Projeto dos observadores
     [t_luenberger, x_luenberger, y_luenberger, x_hat_obs1_luenberger, x_hat_obs2_luenberger, y_hat_luenberger] = run_sim('./simulations', 'luenberger');
     % [t_uio, x_uio, y_uio, x_hat_obs1_uio, x_hat_obs2_uio, y_hat_uio] = run_sim('uio');
-    [t_kalman, x_kalman, y_kalman, x_hat_obs1_kalman, x_hat_obs2_kalman, y_hat_kalman] = run_sim('./simulations', 'kalman');
+    % [t_kalman, x_kalman, y_kalman, x_hat_obs1_kalman, x_hat_obs2_kalman, y_hat_kalman] = run_sim('kalman');
 
     % Plotagens -- TODO: CONVERTER PARA FUNÇOES DPS!
     %%% Residuos para os diferentes casos
-    if sim_case == '1', plot_denoiser_ex(t_luenberger, y_luenberger, y_hat_luenberger, b_filter, a_filter, [0 16 -3.5E-3 3.5E-3], true, './figs/filtering_ex1.png', './figs/filtering_ex2.png'); end  % So na primeira execuçao  
-    
-    plot_residue(t_luenberger, y_luenberger, y_hat_luenberger, y_kalman, y_hat_kalman, sim_case, b_filter, a_filter, true, sprintf('./figs/residue1_c%s.png', sim_case), sprintf('./figs/residue2_c%s.png', sim_case));
+    if i == '1', plot_denoiser_ex(t_luenberger, y_luenberger, y_hat_luenberger, b_filter, a_filter, [0 16 -3.5E-3 3.5E-3], true, './figs/filtering_ex1.png', './figs/filtering_ex2.png'); end  % So na primeira execuçao  
+       
 end
