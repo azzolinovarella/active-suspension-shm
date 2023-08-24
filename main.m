@@ -105,20 +105,22 @@ p_luenberger = 4*p;
 Ko1_luenberger = place(A', C_obs1', p_luenberger)';
 %%%% Observador 2
 Ko2_luenberger = place(A', C_obs2', p_luenberger)';
-
-%%% UIO - Heloi
-%%%% Polos desejados para o observador  - TODO: Problema! E*C = 0 --> Igual a Luenberger
-p_uio = 4*p;
-%%%% Observador 1
-[N_obs1, L_obs1, G_obs1, E_obs1, Ko1_uio] = project_uio(A, B1, B2, C_obs1, p_uio);  % APENAS w(t) como sinal desconhecido
-%%%% Observador 2
-% [N_obs2, L_obs2, G_obs2, E_obs2, Ko2_uio] = project_uio(A, B1, B2, C_obs2, p_uio);  % APENAS w(t) como sinal desconhecido
+%%%% Observador unico
+Kou_luenberger = place(A', C', p_luenberger)';
 
 %%% Kalman
 %%%% Observador 1
 [Ko1_kalman, ~, ~] = lqe(A, B1, C_obs1, W, v_var_y1);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
 %%%% Observador 2
 [Ko2_kalman, ~, ~] = lqe(A, B1, C_obs2, W, v_var_y2);  % Idem
+%%%% Observador unico
+[Kou_kalman, ~, ~] = lqe(A, B1, C, W, V);  % Agora eh V porque tem a matriz de covariancia...
+
+%%% UIO - Heloi
+%%%% Polos desejados para o observador  - TODO: Problema! Usando aceleraçaonao eh possivel...
+p_uio = 4*p;
+%%%% Observador unico - nao temos o caso de banco de observadores aqui
+% [N_obsu, L_obsu, G_obsu, E_obsu, Kou_uio] = project_uio(A, B1, B2, C, p_uio);  % APENAS w(t) como sinal desconhecido
 
 %%% Filtro passa-baixas
 [b_filter, a_filter] = butter(2, 75/(f_sr*pi), 'low');   % wc = 25 + wn2
