@@ -100,7 +100,8 @@ D_obs2 = D(2, :);
 
 %%% Luenberger
 %%%% Polos desejados para o observador
-p_luenberger = 4*p;
+p_luenberger = [-20, -15, -10, -5];
+% p_luenberger = 4*p;
 %%%% Observador 1
 Ko1_luenberger = place(A', C_obs1', p_luenberger)';
 %%%% Observador 2
@@ -118,7 +119,7 @@ Kou_luenberger = place(A', C', p_luenberger)';
 
 %%% UIO - Heloi
 %%%% Polos desejados para o observador  - TODO: Problema! Usando aceleraçaonao eh possivel...
-p_uio = 4*p;
+% p_uio = 4*p;
 %%%% Observador unico - nao temos o caso de banco de observadores aqui
 % [N_obsu, L_obsu, G_obsu, E_obsu, Kou_uio] = project_uio(A, B1, B2, C, p_uio);  % APENAS w(t) como sinal desconhecido
 
@@ -158,13 +159,16 @@ for sim_case = ['1', '2', '3']  % Cada caso da simulacao
     plot_sys_bode(sys_hlt, sys_dmg, sim_case, k1*f0+eps, k2*f0 + 5, [0, 60, -35, 0], [0, 60, 15, 50], true, sprintf('./figs/bode_y1_c%s.png', sim_case), sprintf('./figs/bode_y2_c%s.png', sim_case));
 
     % Projeto dos observadores
-    [t_luenberger, x_luenberger, y_luenberger, x_hat_obs1_luenberger, x_hat_obs2_luenberger, y_hat_luenberger] = run_sim('./simulations', 'luenberger');
-    % [t_uio, x_uio, y_uio, x_hat_obs1_uio, x_hat_obs2_uio, y_hat_uio] = run_sim('uio');
-    [t_kalman, x_kalman, y_kalman, x_hat_obs1_kalman, x_hat_obs2_kalman, y_hat_kalman] = run_sim('./simulations', 'kalman');
+    [t_luenberger, ~, y_luenberger, ~, ~, ~, y_hat_obsu_luenberger, y1_hat_obs1_luenberger, y2_hat_obs2_luenberger] = run_sim('./simulations', 'luenberger');
+    [t_kalman, ~, y_kalman, ~, ~, ~, y_hat_obsu_kalman, y1_hat_obs1_kalman, y2_hat_obs2_kalman] = run_sim('./simulations', 'kalman');
+    % [t_uio, ~, y_uio, ~, ~, ~, y_hat_obsu_uio, y1_hat_obs1_uio, y2_hat_obs2_uio] = run_sim('./simulations', 'uio');
 
     % Plotagens -- TODO: CONVERTER PARA FUNÇOES DPS!
     %%% Residuos para os diferentes casos
-    if sim_case == '1', plot_denoiser_ex(t_luenberger, y_luenberger, y_hat_luenberger, b_filter, a_filter, [0 16 -3.5E-3 3.5E-3], true, './figs/filtering_ex1.png', './figs/filtering_ex2.png'); end  % So na primeira execuçao  
+    if sim_case == '1', plot_denoiser_ex(t_luenberger, y_luenberger, y1_hat_obs1_luenberger, b_filter, a_filter, [0 16 -3.5E-3 3.5E-3], true, './figs/filtering_ex1.png', './figs/filtering_ex2.png'); end  % So na primeira execuçao  
     
-    plot_residue(t_luenberger, y_luenberger, y_hat_luenberger, y_kalman, y_hat_kalman, sim_case, b_filter, a_filter, true, sprintf('./figs/residue1_c%s.png', sim_case), sprintf('./figs/residue2_c%s.png', sim_case));
+    plot_residue(t_luenberger, y_luenberger, y_hat_obsu_luenberger, y1_hat_obs1_luenberger, ...
+                 y2_hat_obs2_luenberger, y_kalman, y_hat_obsu_kalman, y1_hat_obs1_kalman, ...
+                 y2_hat_obs2_kalman, sim_case, b_filter, a_filter, true, sprintf('./figs/residue1_c%s.png', sim_case), ...
+                 sprintf('./figs/residue2_c%s.png', sim_case));
 end
