@@ -26,7 +26,7 @@ mr = 1;     % [mr] = kg --> Massa do eixo-roda
 kp = 1250;  % [kp] = N/m --> Constante elastica do pneu
 bp = 5;     % [bp] = Ns/m --> Coeficiente de amortecimento do pneu
 
-[A, B1, B2, B, C, D] = define_system(mv, ks, bs, mr, kp, bp);
+[A, B1, B2, C, D] = get_matrices(mv, ks, bs, mr, kp, bp);
 
 %% Sinal de Chirp
 
@@ -34,7 +34,8 @@ fprintf('Gerando sinal de chirp...\n')
 
 %%% Chirp 
 % Parametros para gerar o sinal
-As = 0.2;
+As = 0.1;
+% As = 0.2;
 T0 = T/2;
 f0 = 1/T0;
 k1 = 0*(1/f0);  % Fica mais claro do que k1 = 0*T0
@@ -117,8 +118,8 @@ Kou_luenberger = place(A', C', p_luenberger)';
 %%%% Observador unico
 [Kou_kalman, ~, ~] = lqe(A, B1, C, W, V);  % Agora eh V porque tem a matriz de covariancia...
 
-%%% UIO - Heloi
-%%%% Polos desejados para o observador  - TODO: Problema! Usando aceleraçaonao eh possivel...
+%%% [PAUSADO POR ORA] UIO - TODO: Problema! Usando aceleraçao nao eh possivel...
+%%%% Polos desejados para o observador 
 % p_uio = 4*p;
 %%%% Observador unico - nao temos o caso de banco de observadores aqui
 % [N_obsu, L_obsu, G_obsu, E_obsu, Kou_uio] = project_uio(A, B1, B2, C, p_uio);  % APENAS w(t) como sinal desconhecido
@@ -133,13 +134,13 @@ fprintf('Gerando diagrama de bode e rodando as simulaçoes...\n')
 %%% Situaçoes de analise
 %%% Caso 1: Perda do amortecimento da suspensao de 50%
 bs_ = 0.5*bs;
-[A_c1, B1_c1, B2_c1, C_c1, D_c1] = update_matrices(mv, ks, bs_, mr, kp, bp);
+[A_c1, B1_c1, B2_c1, C_c1, D_c1] = get_matrices(mv, ks, bs_, mr, kp, bp);
 %%% Caso 2: Perda da rigidez da mola da suspensao de 50%
 ks_ = 0.5*ks;
-[A_c2, B1_c2, B2_c2, C_c2, D_c2] = update_matrices(mv, ks_, bs, mr, kp, bp);
+[A_c2, B1_c2, B2_c2, C_c2, D_c2] = get_matrices(mv, ks_, bs, mr, kp, bp);
 %%% Caso 3: Perda de amortecimento da suspensao e da rigidez da mola de 50%
 bs_ = 0.5*bs; ks_ = 0.5*ks;
-[A_c3, B1_c3, B2_c3, C_c3, D_c3] = update_matrices(mv, ks_, bs_, mr, kp, bp);
+[A_c3, B1_c3, B2_c3, C_c3, D_c3] = get_matrices(mv, ks_, bs_, mr, kp, bp);
 
 % Condiçoes iniciais
 % CI = [1; 1; 1; 1];

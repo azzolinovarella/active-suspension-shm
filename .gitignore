@@ -1,2 +1,4 @@
 data/
 ignore/
+**/slprj
+**/*.slxc
