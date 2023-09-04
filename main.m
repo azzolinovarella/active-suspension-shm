@@ -1,16 +1,24 @@
 clear; close all; clc
 
+% % Parametros para definir estilo de grafico
+% set(0,'DefaultLineLineWidth', 1.5, ...
+%     'DefaultAxesFontName', 'Latin Modern Math', ...
+%     'DefaultAxesFontSize', 14, ...
+%     'DefaultFigurePosition', [403 914 900 600]); 
+
 % Parametros para definir estilo de grafico
 set(0,'DefaultLineLineWidth', 1.5, ...
     'DefaultAxesFontName', 'Latin Modern Math', ...
-    'DefaultAxesFontSize', 14, ...
-    'DefaultFigurePosition', [403 914 900 600]);  
+    'DefaultAxesFontSize', 20, ...
+    'DefaultFigurePosition', [403 914 900 600]); 
 
 % Para add o path das funçoes ao script atual
 addpath(genpath('./functions'))
 
 % Parametros da simulaçao
-dt = 2.5E-5;  % Para que a gente consiga visualizar bem
+% dt = 2.5E-5;  % Para que a gente consiga visualizar bem
+dt = 2.5E-3;  % Para ir rapido --> diminuir para melhorar resolucao
+% dt = 2.5E-4;  % Meio termo
 f_sr = 1/dt;
 T = 32;  % Deve ser par
 
@@ -32,10 +40,7 @@ bp = 5;     % [bp] = Ns/m --> Coeficiente de amortecimento do pneu
 
 fprintf('Gerando sinal de chirp...\n')
 
-%%% Chirp 
-% Parametros para gerar o sinal
-As = 0.1;
-% As = 0.2;
+% Parametros gerais do sinal de chirp
 T0 = T/2;
 f0 = 1/T0;
 k1 = 0*(1/f0);  % Fica mais claro do que k1 = 0*T0
@@ -43,51 +48,94 @@ k2 = 10*(1/f0);
 t = 0:dt:T0;
 N = 2;  % Numero de periodos
 
+%%% Chirp para w(t)
+% Parametros para gerar o sinal
+Aw = 0.1;
 % Sinal gerado
-[w, t] = generate_chirp(As, T0, k1, k2, t, N);
+[w, tw] = generate_chirp(Aw, T0, k1, k2, t, N);
 W = cov(w);
 % Exportando para arquivo
-wt = timeseries(w, t);
-save('./data/chirp_data.mat', 'wt', '-v7.3')
-
+wt = timeseries(w, tw);
+save('./data/chirp_w_data.mat', 'wt', '-v7.3')
 % Salvando as figuras
 %%% No tempo
-plot_chirp(t, w, [t(1), t(end), -As*1.1, As*1.1], true, './figs/chirp.png');
+plot_chirp(tw, w, '\omega(t)', 'm/s', [tw(1), tw(end), -Aw*1.1, Aw*1.1], true, './figs/chirp/chirp_w.png');
 %%% Na frequencia
-ii = ceil(length(t)/2);
+ii = ceil(length(tw)/2);
 w_ = w(1:ii);  % Fazendo assim pois dois concatenados da bug...
-plot_fspec(w_, length(w_)*10, dt, [k1*f0, k2*f0+2, -20, 1], [k1*f0, k2*f0+2, -185, 185], true, true, './figs/chirp_mag.png');
+plot_fspec(w_, length(w_)*10, dt, [k1*f0, k2*f0+2, -20, 1], true, true, './figs/chirp/chirp_w_mag.png');
+% plot_fspec(w_, length(w_)*10, dt, [k1*f0, k2*f0+2, 10, 30], false, true, './figs/chirp/chirp_w_mag.png');  % Limites conhecidos de antemao
+
+%%% Chirp para u(t)
+% Parametros para gerar o sinal
+Au = 5;
+% Sinal gerado
+[u, tu] = generate_chirp(Au, T0, k1, k2, t, N);
+U = cov(u);
+% Exportando para arquivo
+ut = timeseries(u, tu);
+save('./data/chirp_u_data.mat', 'ut', '-v7.3')
+% Salvando as figuras
+%%% No tempo
+plot_chirp(tu, u, 'u(t)', 'N', [tu(1), tu(end), -Au*1.1, Au*1.1], true, './figs/chirp/chirp_u.png');
+%%% Na frequencia
+ii = ceil(length(tu)/2);
+u_ = u(1:ii);  % Fazendo assim pois dois concatenados da bug...
+plot_fspec(u_, length(u_)*10, dt, [k1*f0, k2*f0+2, -20, 1], true, true, './figs/chirp/chirp_u_mag.png');
+% plot_fspec(u_, length(u_)*10, dt, [k1*f0, k2*f0+2, 30, 50], false, true, './figs/chirp/chirp_u_mag.png');  % Limites conhecidos de antemao
 
 %% Ruido de mediçao e processo
 
 fprintf('Gerando sinal de ruido...\n')
 
-% Pegando y e os valores maximos
-sys = ss(A, B1, C, 0);  % B1 pois queremos estudar apenas w(t)
-y = lsim(sys, w, t);
-y1 = y(:,1);
-y2 = y(:,2);
-
-% Procedimento para gerar matriz de variancia
 % SNR = 20;  % 20dB --> Sinal eh 100x mais potente que o ruido
 SNR = 30;  % 30dB --> Sinal eh 1000x mais potente que o ruido
-[v_y1, v_var_y1] = generate_noise(SNR, y1);
-[v_y2, v_var_y2] = generate_noise(SNR, y2);
 
+% Pegando y e os valores maximos para w(t)
+sys_w = ss(A, B1, C, 0);  % B1 pois queremos estudar apenas w(t)
+y_w = lsim(sys_w, w, tw);
+y1_w = y_w(:,1);
+y2_w = y_w(:,2);
+% Procedimento para gerar matriz de variancia
+[v_y1_w, v_var_y1_w] = generate_noise(SNR, y1_w);
+[v_y2_w, v_var_y2_w] = generate_noise(SNR, y2_w);
 % Gerando a matriz de covariancia
-V = cov(v_y1, v_y2); 
-v = [v_y1; v_y2];
- 
-vt = timeseries(v, t);
-save('./data/measurement_noise.mat', 'vt', '-v7.3')
-
+V_w = cov(v_y1_w, v_y2_w); 
+v_w = [v_y1_w; v_y2_w];
+vt_w = timeseries(v_w, tw);
+save('./data/measurement_noise_w_data.mat', 'vt_w', '-v7.3')
 % Salvando as figuras
 %%% Ruido 1
-plot_noise(t, v(1,:), [0, 32, 1.1*min(v(1,:)), 1.1*max(v(1,:))], '1', 'm', true, './figs/noise_v1.png');
-plot_noise_dist(v(1,:), 30, '1', 'm', true, './figs/noise_v1_dist.png');
+plot_noise(tw, v_w(1,:), [0, 32, 1.1*min(v_w(1,:)), 1.1*max(v_w(1,:))], '1', 'm', ...
+           true, './figs/noise/noise_v1_w.png');
+plot_noise_dist(v_w(1,:), 30, '1', 'm', true, './figs/noise/noise_v1_w_dist.png');
 %%% Ruido 2
-plot_noise(t, v(2,:), [0, 32, 1.1*min(v(2,:)), 1.1*max(v(2,:))], '2', 'm/s', true, './figs/noise_v2.png');
-plot_noise_dist(v(2,:), 30, '2', 'm/s', true, './figs/noise_v2_dist.png');
+plot_noise(tw, v_w(2,:), [0, 32, 1.1*min(v_w(2,:)), 1.1*max(v_w(2,:))], '2', 'm/s^2', ...
+           true, './figs/noise/noise_v2_w.png');
+plot_noise_dist(v_w(2,:), 30, '2', 'm/s^2', true, './figs/noise/noise_v2_w_dist.png');
+
+% Pegando y e os valores maximos para u(t)
+sys_u = ss(A, B2, C, D);  % B2 pois queremos estudar apenas u(t)
+y_u = lsim(sys_u, u, tu);
+y1_u = y_u(:,1);
+y2_u = y_u(:,2);
+% Procedimento para gerar matriz de variancia
+[v_y1_u, v_var_y1_u] = generate_noise(SNR, y1_u);
+[v_y2_u, v_var_y2_u] = generate_noise(SNR, y2_u);
+% Gerando a matriz de covariancia
+V_u = cov(v_y1_u, v_y2_u); 
+v_u = [v_y1_u; v_y2_u];
+vt_u = timeseries(v_u, tu);
+save('./data/measurement_noise_u_data.mat', 'vt_u', '-v7.3')
+% Salvando as figuras
+%%% Ruido 1
+plot_noise(tu, v_u(1,:), [0, 32, 1.1*min(v_u(1,:)), 1.1*max(v_u(1,:))], '1', 'm', ...
+           true, './figs/noise/noise_v1_u.png');
+plot_noise_dist(v_u(1,:), 30, '1', 'm', true, './figs/noise/noise_v1_u_dist.png');
+%%% Ruido 2
+plot_noise(tu, v_u(2,:), [0, 32, 1.1*min(v_u(2,:)), 1.1*max(v_u(2,:))], '2', 'm/s^2', ...
+           true, './figs/noise/noise_v2_u.png');
+plot_noise_dist(v_u(2,:), 30, '2', 'm/s^2', true, './figs/noise/noise_v2_u_dist.png');
 
 %% Projeto dos observadores e do filtro
 
@@ -101,31 +149,57 @@ D_obs2 = D(2, :);
 
 %%% Luenberger
 %%%% Polos desejados para o observador
-p_luenberger = [-20, -15, -10, -5];
-% p_luenberger = 4*p;
-%%%% Observador 1
+% p_luenberger = [-20, -15, -10, -5];
+p_luenberger = 4*p;
+%%%% Banco de Observadores
 Ko1_luenberger = place(A', C_obs1', p_luenberger)';
-%%%% Observador 2
 Ko2_luenberger = place(A', C_obs2', p_luenberger)';
 %%%% Observador unico
 Kou_luenberger = place(A', C', p_luenberger)';
 
-%%% Kalman
-%%%% Observador 1
-[Ko1_kalman, ~, ~] = lqe(A, B1, C_obs1, W, v_var_y1);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
-%%%% Observador 2
-[Ko2_kalman, ~, ~] = lqe(A, B1, C_obs2, W, v_var_y2);  % Idem
-%%%% Observador unico
-[Kou_kalman, ~, ~] = lqe(A, B1, C, W, V);  % Agora eh V porque tem a matriz de covariancia...
-
-%%% [PAUSADO POR ORA] UIO - TODO: Problema! Usando aceleraçao nao eh possivel...
-%%%% Polos desejados para o observador 
-% p_uio = 4*p;
-%%%% Observador unico - nao temos o caso de banco de observadores aqui
-% [N_obsu, L_obsu, G_obsu, E_obsu, Kou_uio] = project_uio(A, B1, B2, C, p_uio);  % APENAS w(t) como sinal desconhecido
+%%% Kalman - MUDA CONFORME O RUIDO DE SAIDA MUDA!
+%%%% Entrada w
+%%%%% Banco de Observadores
+[Ko1_kalman_w, ~, ~] = lqe(A, B1, C_obs1, W, v_var_y1_w);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
+[Ko2_kalman_w, ~, ~] = lqe(A, B1, C_obs2, W, v_var_y2_w);  % Idem
+%%%%% Observador unico
+[Kou_kalman_w, ~, ~] = lqe(A, B1, C, W, V_w);  % Agora eh V porque tem a matriz de covariancia...
+%%%% Entrada u
+% %%%%% Banco de Observadores
+% [Ko1_kalman_u, ~, ~] = lqe(A, B1, C_obs1, U, v_var_y1_u);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
+% [Ko2_kalman_u, ~, ~] = lqe(A, B1, C_obs2, U, v_var_y2_u);  % Idem
+[Ko1_kalman_u, ~, ~] = lqe(A, B2, C_obs1, 0, v_var_y1_u);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
+[Ko2_kalman_u, ~, ~] = lqe(A, B2, C_obs2, 0, v_var_y2_u);  % Idem
+% %%%%% Observador unico
+% [Kou_kalman_u, ~, ~] = lqe(A, B1, C, U, V_u);  % Agora eh V porque tem a matriz de covariancia...
+[Kou_kalman_u, ~, ~] = lqe(A, B2, C, 0, V_u);  % Agora eh V porque tem a matriz de covariancia...
 
 %%% Filtro passa-baixas
-[b_filter, a_filter] = butter(2, 75/(f_sr*pi), 'low');   % wc = 25 + wn2
+[b_filter, a_filter] = butter(2, 75/(f_sr*pi), 'low');   % wc = 25 + wn2 (padrao)
+
+%% Plotando influencia da variacao dos parametros nas saidas
+
+fprintf('Gerando graficos de bode de acordo com variacao de parametros...\n')
+
+percentual_range = linspace(0, 1, 11);
+%%% Rainbow
+colors = ["#BC0000", "#FF595E", "#FF924C", "#FFCA3A", "#C5CA30", "#8AC926", ...
+          "#36949D", "#1982C4", "#4267AC", "#565AA0", "#6A4C93"];
+%%% Reversed
+% colors = ['#3D3D3D', '#6A4C93', '#565AA0', '#4267AC', '#1982C4', '#36949D', ...
+%           '#8AC926', '#C5CA30', '#FF924C', "#FF595E", '#BC0000'];
+%%% Blue
+% colors = ["#000000", "#00003D", "#000052", "#000079", "#00008F", "#0000B8", ...
+%           "#0000FF", "#095DD7", "#429BFA", "#429BFA", "#70B8FF"];
+
+plot_sys_bode_var(mv, ks, bs, mr, kp, bp, 'bs', 0:0.1:1, k1*f0+eps, k2*f0 + 5, colors, ...
+                  [0 60 -35 10], [0 60 15 60], [0 60 -80 -30], [0 60 -25 20], true, ...
+                  './figs/bode/bode_y1_bs_var_w.png', './figs/bode/bode_y2_bs_var_w.png', ...
+                  './figs/bode/bode_y1_bs_var_u.png', './figs/bode/bode_y2_bs_var_u.png');
+plot_sys_bode_var(mv, ks, bs, mr, kp, bp, 'ks', percentual_range, k1*f0+eps, k2*f0 + 5, colors, ...
+                  [0 60 -35 -5], [0 60 0 50], [0 60 -80 -30], [0 60 -25 10], true, ...
+                  './figs/bode/bode_y1_ks_var_w.png', './figs/bode/bode_y2_ks_var_w.png', ...
+                  './figs/bode/bode_y1_ks_var_u.png', './figs/bode/bode_y2_ks_var_u.png');
 
 %% Diagrama de bode e simulaçao para cada caso de dano
 
@@ -146,7 +220,8 @@ bs_ = 0.5*bs; ks_ = 0.5*ks;
 % CI = [1; 1; 1; 1];
 CI = [0; 0; 0; 0];
 
-sys_hlt = ss(A, B1, C, D);  % Nao precisamos usar B2 (vamos analisar apenas a influencia de w)
+sys_hlt_w = ss(A, B1, C, 0);  % Nao precisamos usar B2 (vamos analisar apenas a influencia de w)
+sys_hlt_u = ss(A, B2, C, D);  % Nao precisamos usar B2 (vamos analisar apenas a influencia de w)
 
 for sim_case = ['1', '2', '3']  % Cada caso da simulacao
     A_sim_case = eval(sprintf('A_c%s', sim_case));
@@ -154,22 +229,38 @@ for sim_case = ['1', '2', '3']  % Cada caso da simulacao
     B2_sim_case = eval(sprintf('B2_c%s', sim_case));
     C_sim_case = eval(sprintf('C_c%s', sim_case));
     D_sim_case = eval(sprintf('D_c%s', sim_case));
-    sys_dmg = ss(A_sim_case, B1_sim_case, C_sim_case, D_sim_case);
+    
+    sys_dmg_w = ss(A_sim_case, B1_sim_case, C_sim_case, 0);
+    sys_dmg_u = ss(A_sim_case, B2_sim_case, C_sim_case, D_sim_case);
 
     % Diagrama de bode para cada situacao de falha
-    plot_sys_bode(sys_hlt, sys_dmg, sim_case, k1*f0+eps, k2*f0 + 5, [0, 60, -35, 0], [0, 60, 15, 50], true, sprintf('./figs/bode_y1_c%s.png', sim_case), sprintf('./figs/bode_y2_c%s.png', sim_case));
+    plot_sys_bode(sys_hlt_w, sys_dmg_w, sim_case, k1*f0+eps, k2*f0 + 5, [0, 60, -35, 0], ...
+                  [0, 60, 15, 50], true, sprintf('./figs/bode/bode_y1_w_c%s.png', sim_case), ...
+                  sprintf('./figs/bode/bode_y2_w_c%s.png', sim_case));
+    plot_sys_bode(sys_hlt_u, sys_dmg_u, sim_case, k1*f0+eps, k2*f0 + 5, [0, 60, -80, -30], ...
+                  [0, 60, -25, 15], true, sprintf('./figs/bode/bode_y1_u_c%s.png', sim_case), ...
+                  sprintf('./figs/bode/bode_y2_u_c%s.png', sim_case));
 
-    % Projeto dos observadores
-    [t_luenberger, ~, y_luenberger, ~, ~, ~, y_hat_obsu_luenberger, y1_hat_obs1_luenberger, y2_hat_obs2_luenberger] = run_sim('./simulations', 'luenberger');
-    [t_kalman, ~, y_kalman, ~, ~, ~, y_hat_obsu_kalman, y1_hat_obs1_kalman, y2_hat_obs2_kalman] = run_sim('./simulations', 'kalman');
-    % [t_uio, ~, y_uio, ~, ~, ~, y_hat_obsu_uio, y1_hat_obs1_uio, y2_hat_obs2_uio] = run_sim('./simulations', 'uio');
+    % Simulaçao dos observadores
+    %%% Entrada w
+    [t_luenberger_w, ~, y_luenberger_w, ~, ~, ~, y_hat_obsu_luenberger_w, y1_hat_obs1_luenberger_w, y2_hat_obs2_luenberger_w] = run_sim('./simulations', 'luenberger_w');
+    [t_kalman_w, ~, y_kalman_w, ~, ~, ~, y_hat_obsu_kalman_w, y1_hat_obs1_kalman_w, y2_hat_obs2_kalman_w] = run_sim('./simulations', 'kalman_w');
+    plot_residue(t_luenberger_w, y_luenberger_w, y_hat_obsu_luenberger_w, y1_hat_obs1_luenberger_w, ...
+                 y2_hat_obs2_luenberger_w, y_kalman_w, y_hat_obsu_kalman_w, y1_hat_obs1_kalman_w, ...
+                 y2_hat_obs2_kalman_w, sim_case, b_filter, a_filter, true, sprintf('./figs/residue/residue1_w_c%s.png', sim_case), ...
+                 sprintf('./figs/residue/residue2_w_c%s.png', sim_case));
+    %%% Entrada u
+    % Simulaçao dos observadores
+    [t_luenberger_u, ~, y_luenberger_u, ~, ~, ~, y_hat_obsu_luenberger_u, y1_hat_obs1_luenberger_u, y2_hat_obs2_luenberger_u] = run_sim('./simulations', 'luenberger_u');
+    [t_kalman_u, ~, y_kalman_u, ~, ~, ~, y_hat_obsu_kalman_u, y1_hat_obs1_kalman_u, y2_hat_obs2_kalman_u] = run_sim('./simulations', 'kalman_u');
+    plot_residue(t_luenberger_u, y_luenberger_u, y_hat_obsu_luenberger_u, y1_hat_obs1_luenberger_u, ...
+                 y2_hat_obs2_luenberger_u, y_kalman_u, y_hat_obsu_kalman_u, y1_hat_obs1_kalman_u, ...
+                 y2_hat_obs2_kalman_u, sim_case, b_filter, a_filter, true, sprintf('./figs/residue/residue1_u_c%s.png', sim_case), ...
+                 sprintf('./figs/residue/residue2_u_c%s.png', sim_case));
 
-    % Plotagens -- TODO: CONVERTER PARA FUNÇOES DPS!
-    %%% Residuos para os diferentes casos
-    if sim_case == '1', plot_denoiser_ex(t_luenberger, y_luenberger, y1_hat_obs1_luenberger, b_filter, a_filter, [0 16 -3.5E-3 3.5E-3], true, './figs/filtering_ex1.png', './figs/filtering_ex2.png'); end  % So na primeira execuçao  
-    
-    plot_residue(t_luenberger, y_luenberger, y_hat_obsu_luenberger, y1_hat_obs1_luenberger, ...
-                 y2_hat_obs2_luenberger, y_kalman, y_hat_obsu_kalman, y1_hat_obs1_kalman, ...
-                 y2_hat_obs2_kalman, sim_case, b_filter, a_filter, true, sprintf('./figs/residue1_c%s.png', sim_case), ...
-                 sprintf('./figs/residue2_c%s.png', sim_case));
+    % Roda apenas na primeira vez - Exemplo de filtragem de residuos
+    if sim_case == '1', plot_denoiser_ex(t_luenberger_w, y_luenberger_w, y1_hat_obs1_luenberger_w, ...
+                                         b_filter, a_filter, [0 16 -1E-3 1E-3], ...
+                                         true, './figs/noise/filtering_ex1.png', ...
+                                         './figs/noise/filtering_ex2.png'); end  % So na primeira execuçao  
 end

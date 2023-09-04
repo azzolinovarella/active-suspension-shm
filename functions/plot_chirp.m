@@ -1,4 +1,4 @@
-function fig = plot_chirp(t, w, limits, save, save_path)
+function fig = plot_chirp(t, w, signal_ref, signal_unit, limits, save, save_path)
     if save && exist('save_path', 'var')
         fig = figure('visible', 'off');
     else
@@ -8,7 +8,7 @@ function fig = plot_chirp(t, w, limits, save, save_path)
     plot(t, w)
     if ~save, title('Sinal de Chirp Utilizado'); end
     xlabel('t (s)')
-    ylabel('\omega(t) (m/s)');
+    ylabel(sprintf('%s (%s)', signal_ref, signal_unit));
     grid on
     axis(limits)
        

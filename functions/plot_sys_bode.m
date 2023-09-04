@@ -18,13 +18,13 @@ function [fig1, fig2] = plot_sys_bode(sys_hlt, sys_dmg, sim_case, f1, f2, ylimit
     %%% Usando w
     semilogx(wout_hlt, y1_hlt_bode)
     semilogx(wout_dmg, y1_dmg_bode)
-    xlabel('\omega (rad/s)')
+    xlabel('\Omega (rad/s)')
     %%% Usando f
     % semilogx(wout_hlt/(2*pi), y1_hlt_bode)
     % semilogx(wout_dmg/(2*pi), y1_dmg_bode)
     % xlabel('f (Hz)')
     grid on
-    ylabel('|Y_1(j\omega)|(dB)')
+    ylabel('|Y_1(j\Omega)|(dB)')
     axis(ylimits1)
     if ~save, title(['Comparaçao do ganho 1 para sistema com dano do tipo ', sim_case]); legend('Saudavel', sprintf('Situacao de dano %s', sim_case)); end
     if save && exist('save_path1', 'var'); save_fig(fig1, save_path1); end
@@ -38,13 +38,13 @@ function [fig1, fig2] = plot_sys_bode(sys_hlt, sys_dmg, sim_case, f1, f2, ylimit
     %%% Usando w
     semilogx(wout_hlt, y2_hlt_bode)
     semilogx(wout_dmg, y2_dmg_bode)
-    xlabel('\omega (rad/s)')
+    xlabel('\Omega (rad/s)')
     %%% Usando f
     % semilogx(wout_hlt/(2*pi), y2_hlt_bode)
     % semilogx(wout_dmg/(2*pi), y2_dmg_bode)
     % xlabel('f (Hz)')
     grid on
-    ylabel('|Y_2(j\omega)| (dB)')
+    ylabel('|Y_2(j\Omega)| (dB)')
     axis(ylimits2)
     if ~save, title(['Comparaçao do ganho 2 para sistema com dano do tipo ', sim_case]); legend('Saudavel', sprintf('Situacao de dano %s', sim_case)); end    
     if save && exist('save_path2', 'var'); save_fig(fig2, save_path2); end  
