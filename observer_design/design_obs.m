@@ -26,6 +26,10 @@ kp = 1250;  % [kp] = N/m --> Constante elastica do pneu
 bp = 5;     % [bp] = Ns/m --> Coeficiente de amortecimento do pneu
 
 [A, B1, B2, C, D] = define_system(mv, ks, bs, mr, kp, bp);
+C_obs1 = C(1,:);
+D_obs1 = D(1);
+C_obs2 = C(2,:);
+D_obs2 = D(2);
 
 p = eig(A);
 
@@ -52,14 +56,16 @@ B2_sim_case = eval(sprintf('B2_c%s', sim_case));
 C_sim_case = eval(sprintf('C_c%s', sim_case));
 D_sim_case = eval(sprintf('D_c%s', sim_case));
 
-% Observador unico com entrada w
+%% Projeto dos obs
+
+% % Observador unico com entrada w
 figure(1);
 for n_mul = linspace(4, 10, 5)
     p_real = n_mul*real(p);
     for m_mul = linspace(0, 10, 5)
     % for m_mul = 0
         p_imag = m_mul*imag(p);
-        
+
         p_obsu_w = p_real + p_imag*1j;
         if m_mul == 0
             p_obsu_w(2) = 1.25*p_obsu_w(1);
@@ -67,35 +73,215 @@ for n_mul = linspace(4, 10, 5)
         end
 
         Kou_luenberger_w = place(A', C', p_obsu_w)';
-        [t, x, y, x_hat_obsu, y_hat_obsu] = run_sim('.', 'luenberger_obsu_w_design');
+        [t, x, y, x_hat_obs, y_hat_obs] = run_simu('.', 'luenberger_obsu_w_design');
 
-        r1_obsu = filter(b_filter, a_filter, (y.y1 - y_hat_obsu.y1_hat));
-        r2_obsu = filter(b_filter, a_filter, (y.y2 - y_hat_obsu.y2_hat));
-        
+        r1_obs = filter(b_filter, a_filter, (y.y1 - y_hat_obs.y1_hat));
+        r2_obs = filter(b_filter, a_filter, (y.y2 - y_hat_obs.y2_hat));
+
         subplot(1, 2, 1) 
         hold on  % Se quiser ver tudo junto
-        plot(t, r1_obsu)
+        plot(t, r1_obs)
         % hold on  % Se quiser ver separado
         grid on
         ylabel('r_1(t) (m)')
         xlabel('t (s)')
         xline(T/2, 'k--', 'LineWidth', 2)
         hold off
-        
+
         subplot(1, 2, 2) 
-        hold on  % Se quiser ver tudo junto
-        plot(t, r2_obsu)
+        hold on  %3 Se quiser ver tudo junto
+        plot(t, r2_obs)
         % hold on  % Se quiser ver separado
         grid on
         ylabel('r_2(t) (m/s^2)')
         xlabel('t (s)')
         xline(T/2, 'k--', 'LineWidth', 2)
         hold off
-      
+
         sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
         pause
     end
 end
-
 close 1
 
+% Observador 1 com entrada w
+figure(2);
+for n_mul = linspace(4, 10, 5)
+    p_real = n_mul*real(p);
+    for m_mul = linspace(0, 10, 5)
+    % for m_mul = 0
+        p_imag = m_mul*imag(p);
+
+        p_obs1_w = p_real + p_imag*1j;
+        if m_mul == 0
+            p_obs1_w(2) = 1.25*p_obs1_w(1);
+            p_obs1_w(4) = 1.25*p_obs1_w(3);
+        end
+
+        Ko1_luenberger_w = place(A', C_obs1', p_obs1_w)';
+        [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs1_w_design');
+
+        r1_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
+
+        hold on  % Se quiser ver tudo junto
+        plot(t, r1_obs)
+        % hold on  % Se quiser ver separado
+        grid on
+        ylabel('r_1(t) (m)')
+        xlabel('t (s)')
+        xline(T/2, 'k--', 'LineWidth', 2)
+        hold off
+
+        sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
+        pause
+    end
+end
+close 2
+
+% Observador 2 com entrada w
+figure(3);
+for n_mul = linspace(4, 10, 5)
+    p_real = n_mul*real(p);
+    for m_mul = linspace(0, 10, 5)
+    % for m_mul = 0
+        p_imag = m_mul*imag(p);
+
+        p_obs2_w = p_real + p_imag*1j;
+        if m_mul == 0
+            p_obs2_w(2) = 1.25*p_obs2_w(1);
+            p_obs2_w(4) = 1.25*p_obs2_w(3);
+        end
+
+        Ko2_luenberger_w = place(A', C_obs2', p_obs2_w)';
+        [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs2_w_design');
+
+        r2_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
+
+        hold on  % Se quiser ver tudo junto
+        plot(t, r2_obs)
+        % hold on  % Se quiser ver separado
+        grid on
+        ylabel('r_2(t) (m/s^2)')
+        xlabel('t (s)')
+        xline(T/2, 'k--', 'LineWidth', 2)
+        hold off
+
+        sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
+        pause
+    end
+end
+close 3
+
+% Observador unico com entrada u
+figure(4);
+for n_mul = linspace(4, 10, 5)
+    p_real = n_mul*real(p);
+    % for m_mul = linspace(0, 10, 5)
+    for m_mul = 0
+        p_imag = m_mul*imag(p);
+
+        p_obsu_u = p_real + p_imag*1j;
+        if m_mul == 0
+            p_obsu_u(2) = 1.25*p_obsu_u(1);
+            p_obsu_u(4) = 1.25*p_obsu_u(3);
+        end
+
+        Kou_luenberger_u = place(A', C', p_obsu_u)';
+        [t, x, y, x_hat_obs, y_hat_obs] = run_simu('.', 'luenberger_obsu_u_design');
+
+        r1_obs = filter(b_filter, a_filter, (y.y1 - y_hat_obs.y1_hat));
+        r2_obs = filter(b_filter, a_filter, (y.y2 - y_hat_obs.y2_hat));
+
+        subplot(1, 2, 1) 
+        hold on  % Se quiser ver tudo junto
+        plot(t, r1_obs)
+        % hold on  % Se quiser ver separado
+        grid on
+        ylabel('r_1(t) (m)')
+        xlabel('t (s)')
+        xline(T/2, 'k--', 'LineWidth', 2)
+        hold off
+
+        subplot(1, 2, 2) 
+        hold on  % Se quiser ver tudo junto
+        plot(t, r2_obs)
+        % hold on  % Se quiser ver separado
+        grid on
+        ylabel('r_2(t) (m/s^2)')
+        xlabel('t (s)')
+        xline(T/2, 'k--', 'LineWidth', 2)
+        hold off
+
+        sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
+        pause
+    end
+end
+close 4
+
+% Observador 1 com entrada u
+figure(5);
+for n_mul = linspace(4, 10, 5)
+    p_real = n_mul*real(p);
+    for m_mul = linspace(0, 10, 5)
+    % for m_mul = 0
+        p_imag = m_mul*imag(p);
+
+        p_obs1_u = p_real + p_imag*1j;
+        if m_mul == 0
+            p_obs1_u(2) = 1.25*p_obs1_u(1);
+            p_obs1_u(4) = 1.25*p_obs1_u(3);
+        end
+
+        Ko1_luenberger_u = place(A', C_obs1', p_obs1_u)';
+        [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs1_u_design');
+
+        r1_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
+
+        % hold on  % Se quiser ver tudo junto
+        plot(t, r1_obs)
+        hold on  % Se quiser ver separado
+        grid on
+        ylabel('r_1(t) (m)')
+        xlabel('t (s)')
+        xline(T/2, 'k--', 'LineWidth', 2)
+        hold off
+
+        sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
+        pause
+    end
+end
+close 5
+
+% Observador 2 com entrada u
+figure(6);
+for n_mul = linspace(4, 10, 5)
+    p_real = n_mul*real(p);
+    for m_mul = linspace(0, 10, 5)
+    % for m_mul = 0
+        p_imag = m_mul*imag(p);
+
+        p_obs2_u = p_real + p_imag*1j;
+        if m_mul == 0
+            p_obs2_u(2) = 1.25*p_obs2_u(1);
+            p_obs2_u(4) = 1.25*p_obs2_u(3);
+        end
+
+        Ko2_luenberger_u = place(A', C_obs2', p_obs2_u)';
+        [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs2_u_design');
+
+        r2_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
+
+        % hold on  % Se quiser ver tudo junto
+        plot(t, r2_obs)
+        hold on  % Se quiser ver separado
+        grid on
+        ylabel('r_2(t) (m/s^2)')
+        xlabel('t (s)')
+        xline(T/2, 'k--', 'LineWidth', 2)
+        hold off
+
+        sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
+        pause
+    end
+end
+close 6
