@@ -10,6 +10,7 @@ function [fig1, fig2, fig3, fig4] = plot_sys_bode_var(mv, ks, bs, mr, kp, bp, ..
     xlabel('\Omega (rad/s)')
     ylabel('|Y_1(\Omega)/\omega(\Omega)|(dB)')
     grid on
+    box on
     if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end  
 
     if save
@@ -20,6 +21,7 @@ function [fig1, fig2, fig3, fig4] = plot_sys_bode_var(mv, ks, bs, mr, kp, bp, ..
     xlabel('\Omega (rad/s)')
     ylabel('|Y_2(\Omega)/\omega(\Omega)|(dB)')
     grid on
+    box on
     legend('Location', 'northeastoutside')
     if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end 
 
@@ -31,6 +33,7 @@ function [fig1, fig2, fig3, fig4] = plot_sys_bode_var(mv, ks, bs, mr, kp, bp, ..
     xlabel('\Omega (rad/s)')
     ylabel('|Y_1(\Omega)/U(\Omega)|(dB)')
     grid on
+    box on
     if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end 
 
     if save
@@ -41,6 +44,7 @@ function [fig1, fig2, fig3, fig4] = plot_sys_bode_var(mv, ks, bs, mr, kp, bp, ..
     xlabel('\Omega (rad/s)')
     ylabel('|Y_2(\Omega)/U(\Omega)|(dB)')
     grid on
+    box on
     legend('Location', 'northeastoutside')
     if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end
 

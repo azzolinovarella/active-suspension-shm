@@ -26,16 +26,19 @@ function [fig1, fig2] = plot_residue(t, y_luenberger, y_hat_obsu_luenberger, ...
     % plot(t, r1_obsu_kalman, 'Color', '#A31621')
     % plot(t, r1_obs1_kalman, 'Color', '#F37748')
     plot(t, r1_obsu_luenberger, 'Color', '#053C5E', 'DisplayName', 'Luenberger observador unico')
-    plot(t, r1_obs1_luenberger, 'Color', '#1F7A8C', 'DisplayName', 'Luenberger banco de observadores')
+    plot(t, r1_obs1_luenberger, 'Color', '#84A98C', 'DisplayName', 'Luenberger banco de observadores')
     plot(t, r1_obsu_kalman, 'Color', '#A31621', 'DisplayName', 'Kalman observador unico')
     plot(t, r1_obs1_kalman, 'Color', '#F37748', 'DisplayName', 'Kalman banco de observadores')
     % xline(t(end)/2, 'k--', 'LineWidth', 2)
     xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
     ylabel('r_1(t) (m)')
     xlabel('t (s)')
-    xlim([t(1), t(end)])
-    legend('Location', 'northwest')
+    % xlim([t(1), t(end)])
+    axis([t(1) t(end) 1.1*min(min([r1_obsu_luenberger, r1_obs1_luenberger, r1_obsu_kalman, r1_obs1_kalman])) 1.1*max(max([r1_obsu_luenberger, r1_obs1_luenberger, r1_obsu_kalman, r1_obs1_kalman]))])
+    % legend('Location', 'northwest')
+    % legend('Location', 'northwest', 'FontSize', 14)
     grid on
+    box on
 
     if ~save
         title(sprintf('Residuo 1 para caso %s', sim_case));
@@ -55,15 +58,17 @@ function [fig1, fig2] = plot_residue(t, y_luenberger, y_hat_obsu_luenberger, ...
     % plot(t, r2_obsu_kalman, 'Color', '#A31621', 'DisplayName', 'Kalman observador unico')
     % plot(t, r2_obs2_kalman, 'Color', '#F37748', 'DisplayName', 'Kalman banco de observadores')
     plot(t, r2_obsu_luenberger, 'Color', '#053C5E')
-    plot(t, r2_obs2_luenberger, 'Color', '#1F7A8C')
+    plot(t, r2_obs2_luenberger, 'Color', '#84A98C')
     plot(t, r2_obsu_kalman, 'Color', '#A31621')
     plot(t, r2_obs2_kalman, 'Color', '#F37748')  
     ylabel('r_2(t) (m/s^2)')
     xlabel('t (s)')
     % xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
     xline(t(end)/2, 'k--', 'LineWidth', 2)
-    xlim([t(1), t(end)])
+    % xlim([t(1), t(end)])
+    axis([t(1) t(end) 1.1*min(min([r2_obsu_luenberger, r2_obs2_luenberger, r2_obsu_kalman, r2_obs2_kalman])) 1.1*max(max([r2_obsu_luenberger, r2_obs2_luenberger, r2_obsu_kalman, r2_obs2_kalman]))])
     grid on
+    box on
     % legend('Location', 'northeastoutside')
     % legend('Location', 'northeast')
     if ~save

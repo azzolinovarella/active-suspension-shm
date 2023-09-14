@@ -1,5 +1,7 @@
 clear; close all; clc
 
+reset(0)
+
 %% Parametros da simulaçao
 
 dt = 2.5E-3;  % Para que a gente consiga visualizar bem e seja rapido
@@ -36,7 +38,7 @@ p = eig(A);
 %% Situaçoes de dano
 
 %%% Situaçoes de analise  
-%%% Caso 0: Sem dano
+%%% Caso 1: Sem dano
 [A_c0, B1_c0, B2_c0, C_c0, D_c0] = define_system(mv, ks, bs, mr, kp, bp);
 %%% Caso 1: Perda do amortecimento da suspensao de 50%
 bs_ = 0.5*bs;
@@ -60,10 +62,16 @@ D_sim_case = eval(sprintf('D_c%s', sim_case));
 
 % % Observador unico com entrada w
 figure(1);
-for n_mul = linspace(4, 10, 5)
+fprintf('OBSERVADOR UNICO COM ENTRADA w(t)\n');
+%%% Para fazer uma busca fina
+% real_space = linspace(4, 10, 5);
+% imag_space = linspace(0, 10, 5);
+%%% Apos busca fina
+real_space = 7;
+imag_space = 0;
+for n_mul = real_space
     p_real = n_mul*real(p);
-    for m_mul = linspace(0, 10, 5)
-    % for m_mul = 0
+    for m_mul = imag_space
         p_imag = m_mul*imag(p);
 
         p_obsu_w = p_real + p_imag*1j;
@@ -72,7 +80,7 @@ for n_mul = linspace(4, 10, 5)
             p_obsu_w(4) = 1.25*p_obsu_w(3);
         end
 
-        Kou_luenberger_w = place(A', C', p_obsu_w)';
+        Ko = place(A', C', p_obsu_w)';
         [t, x, y, x_hat_obs, y_hat_obs] = run_simu('.', 'luenberger_obsu_w_design');
 
         r1_obs = filter(b_filter, a_filter, (y.y1 - y_hat_obs.y1_hat));
@@ -99,17 +107,36 @@ for n_mul = linspace(4, 10, 5)
         hold off
 
         sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
-        pause
+        
+        best_res = input('Melhor resultado? ');
+        if best_res
+            Ko_best = Ko;
+            r1_obs_best = r1_obs;
+            r2_obs_best = r2_obs;
+        end
     end
 end
+fprintf('Melhor matriz de ganho:');
+disp(Ko_best)
+fprintf('Limiar r1:')
+disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
+fprintf('Limiar r2:')
+disp(1.5*max(abs(r2_obs_best(1:ceil(length(r2_obs)/2)))));
+fprintf('\n\n')
 close 1
 
 % Observador 1 com entrada w
 figure(2);
-for n_mul = linspace(4, 10, 5)
+fprintf('OBSERVADOR 1 COM ENTRADA w(t)\n');
+%%% Para fazer uma busca fina
+% real_space = linspace(4, 10, 5);
+% imag_space = linspace(0, 10, 5);
+%%% Apos busca fina
+real_space = 2;
+imag_space = 2;
+for n_mul = real_space
     p_real = n_mul*real(p);
-    for m_mul = linspace(0, 10, 5)
-    % for m_mul = 0
+    for m_mul = imag_space
         p_imag = m_mul*imag(p);
 
         p_obs1_w = p_real + p_imag*1j;
@@ -118,7 +145,7 @@ for n_mul = linspace(4, 10, 5)
             p_obs1_w(4) = 1.25*p_obs1_w(3);
         end
 
-        Ko1_luenberger_w = place(A', C_obs1', p_obs1_w)';
+        Ko = place(A', C_obs1', p_obs1_w)';
         [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs1_w_design');
 
         r1_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
@@ -133,17 +160,33 @@ for n_mul = linspace(4, 10, 5)
         hold off
 
         sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
-        pause
+        
+        best_res = input('Melhor resultado? ');
+        if best_res
+            Ko_best = Ko;
+            r1_obs_best = r1_obs;
+        end
     end
 end
+fprintf('Melhor matriz de ganho:');
+disp(Ko_best)
+fprintf('Limiar r1:')
+disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
+fprintf('\n\n')
 close 2
 
 % Observador 2 com entrada w
 figure(3);
-for n_mul = linspace(4, 10, 5)
+fprintf('OBSERVADOR 2 COM ENTRADA w(t)\n');
+%%% Para fazer uma busca fina
+% real_space = linspace(4, 10, 5);
+% imag_space = linspace(0, 10, 5);
+%%% Apos busca fina
+real_space = 2;
+imag_space = 2;
+for n_mul = real_space
     p_real = n_mul*real(p);
-    for m_mul = linspace(0, 10, 5)
-    % for m_mul = 0
+    for m_mul = imag_space
         p_imag = m_mul*imag(p);
 
         p_obs2_w = p_real + p_imag*1j;
@@ -152,7 +195,7 @@ for n_mul = linspace(4, 10, 5)
             p_obs2_w(4) = 1.25*p_obs2_w(3);
         end
 
-        Ko2_luenberger_w = place(A', C_obs2', p_obs2_w)';
+        Ko = place(A', C_obs2', p_obs2_w)';
         [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs2_w_design');
 
         r2_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
@@ -167,17 +210,33 @@ for n_mul = linspace(4, 10, 5)
         hold off
 
         sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
-        pause
+        
+        best_res = input('Melhor resultado? ');
+        if best_res
+            Ko_best = Ko;
+            r2_obs_best = r2_obs;
+        end
     end
 end
+fprintf('Melhor matriz de ganho:');
+disp(Ko_best)
+fprintf('Limiar r2:')
+disp(1.5*max(abs(r2_obs_best(1:ceil(length(r2_obs)/2)))));
+fprintf('\n\n')
 close 3
 
 % Observador unico com entrada u
 figure(4);
-for n_mul = linspace(4, 10, 5)
+fprintf('OBSERVADOR UNICO COM ENTRADA u(t)\n');
+%%% Para fazer uma busca fina
+% real_space = linspace(4, 10, 5);
+% imag_space = linspace(0, 10, 5);
+%%% Apos busca fina
+real_space = 7;
+imag_space = 0;
+for n_mul = real_space
     p_real = n_mul*real(p);
-    % for m_mul = linspace(0, 10, 5)
-    for m_mul = 0
+    for m_mul = imag_space
         p_imag = m_mul*imag(p);
 
         p_obsu_u = p_real + p_imag*1j;
@@ -186,7 +245,7 @@ for n_mul = linspace(4, 10, 5)
             p_obsu_u(4) = 1.25*p_obsu_u(3);
         end
 
-        Kou_luenberger_u = place(A', C', p_obsu_u)';
+        Ko = place(A', C', p_obsu_u)';
         [t, x, y, x_hat_obs, y_hat_obs] = run_simu('.', 'luenberger_obsu_u_design');
 
         r1_obs = filter(b_filter, a_filter, (y.y1 - y_hat_obs.y1_hat));
@@ -213,17 +272,36 @@ for n_mul = linspace(4, 10, 5)
         hold off
 
         sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
-        pause
+        
+        best_res = input('Melhor resultado? ');
+        if best_res
+            Ko_best = Ko;
+            r1_obs_best = r1_obs;
+            r2_obs_best = r2_obs;
+        end
     end
 end
+fprintf('Melhor matriz de ganho:');
+disp(Ko_best)
+fprintf('Limiar r1:')
+disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
+fprintf('Limiar r2:')
+disp(1.5*max(abs(r2_obs_best(1:ceil(length(r2_obs)/2)))));
+fprintf('\n\n')
 close 4
 
 % Observador 1 com entrada u
 figure(5);
-for n_mul = linspace(4, 10, 5)
+fprintf('OBSERVADOR 1 COM ENTRADA u(t)\n');
+%%% Para fazer uma busca fina
+% real_space = linspace(4, 10, 5);
+% imag_space = linspace(0, 10, 5);
+%%% Apos busca fina
+real_space = 5.5;
+imag_space = 2.5;
+for n_mul = real_space
     p_real = n_mul*real(p);
-    for m_mul = linspace(0, 10, 5)
-    % for m_mul = 0
+    for m_mul = imag_space
         p_imag = m_mul*imag(p);
 
         p_obs1_u = p_real + p_imag*1j;
@@ -232,7 +310,7 @@ for n_mul = linspace(4, 10, 5)
             p_obs1_u(4) = 1.25*p_obs1_u(3);
         end
 
-        Ko1_luenberger_u = place(A', C_obs1', p_obs1_u)';
+        Ko = place(A', C_obs1', p_obs1_u)';
         [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs1_u_design');
 
         r1_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
@@ -247,17 +325,33 @@ for n_mul = linspace(4, 10, 5)
         hold off
 
         sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
-        pause
+        
+        best_res = input('Melhor resultado? ');
+        if best_res
+            Ko_best = Ko;
+            r1_obs_best = r1_obs;
+        end
     end
 end
+fprintf('Melhor matriz de ganho:');
+disp(Ko_best)
+fprintf('Limiar r1:')
+disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
+fprintf('\n\n')
 close 5
 
 % Observador 2 com entrada u
 figure(6);
-for n_mul = linspace(4, 10, 5)
+fprintf('OBSERVADOR 2 COM ENTRADA u(t)\n');
+%%% Para fazer uma busca fina
+% real_space = linspace(4, 10, 5);
+% imag_space = linspace(0, 10, 5);
+%%% Apos busca fina
+real_space = 5.5;
+imag_space = 2.5;
+for n_mul = real_space
     p_real = n_mul*real(p);
-    for m_mul = linspace(0, 10, 5)
-    % for m_mul = 0
+    for m_mul = imag_space
         p_imag = m_mul*imag(p);
 
         p_obs2_u = p_real + p_imag*1j;
@@ -266,7 +360,7 @@ for n_mul = linspace(4, 10, 5)
             p_obs2_u(4) = 1.25*p_obs2_u(3);
         end
 
-        Ko2_luenberger_u = place(A', C_obs2', p_obs2_u)';
+        Ko = place(A', C_obs2', p_obs2_u)';
         [t, x, y, x_hat_obs, y_hat_obs] = run_simi('.', 'luenberger_obs2_u_design');
 
         r2_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
@@ -281,7 +375,17 @@ for n_mul = linspace(4, 10, 5)
         hold off
 
         sgtitle(sprintf('%.2f & %.2f', n_mul, m_mul))
-        pause
+        
+        best_res = input('Melhor resultado? ');
+        if best_res
+            Ko_best = Ko;
+            r2_obs_best = r2_obs;
+        end
     end
 end
+fprintf('Melhor matriz de ganho:');
+disp(Ko_best)
+fprintf('Limiar r2:')
+disp(1.5*max(abs(r2_obs_best(1:ceil(length(r2_obs)/2)))));
+fprintf('\n\n')
 close 6

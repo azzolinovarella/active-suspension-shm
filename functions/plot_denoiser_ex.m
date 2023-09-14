@@ -11,6 +11,7 @@ function [fig1, fig2] = plot_denoiser_ex(t, y, y_hat, b_filter, a_filter, limits
     end
     plot(t, r)
     grid on
+    box on
     if ~save; title('Resíduo não filtrado'); end
     ylabel('Amplitude (m)')
     xlabel('t (s)')
@@ -23,6 +24,7 @@ function [fig1, fig2] = plot_denoiser_ex(t, y, y_hat, b_filter, a_filter, limits
     end
     plot(t, r_filtered)
     grid on
+    box on
     if ~save; title('Resíduo filtrado'); end
     ylabel('Amplitude (m)')
     xlabel('t (s)')

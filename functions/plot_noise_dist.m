@@ -17,6 +17,7 @@ function fig = plot_noise_dist(v, n_bins, signal_ref, unit_ref, save, save_path)
 
     xlabel(['Amplitude do ruído (', unit_ref, ')'])
     grid on  % Para manter o padrao...
+    box on
 
     if ~save, title(['Distribuição do ruído adicionado a y_', signal_ref, '(t)']); end
     if save && exist('save_path', 'var'); save_fig(fig, save_path); end

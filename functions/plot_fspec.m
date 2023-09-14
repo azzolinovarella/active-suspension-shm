@@ -24,6 +24,7 @@ function fig = plot_fspec(w, N, dt, limits, normalize, save, save_path)
     ylabel('Magnitude (dB)');
     xlabel('f (Hz)')
     grid on
+    box on
     axis(limits)
     
     % ax2 = subplot(2, 1, 2);

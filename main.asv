@@ -273,35 +273,12 @@ end
 
 %% Melhor estimador e forma de excitaçao (apos analise)
 
-fprintf('Gerando residuos com limiares para o melhor sistema...\n')
-
 best_sim = 'luenberger_u';
-best_exct_pos = 'u';
 r1_limit = 8.9825E-04;  % Obtido no obs_design...
 r2_limit = 0.5740;
 
 [t_best, ~, y_best, ~, ~, ~, y_hat_obsu_best, y1_hat_obs1_best, y2_hat_obs2_best] = run_sim('./simulations', best_sim);
 
-if best_exct_pos == "u"
-    y_hat_best = y_hat_obsu_best;
-else
-    y_hat_best = struct;
-    y_hat_best.y1_hat = y1_hat_obs1_best.y1_hat;
-    y_hat_best.y2_hat = y2_hat_obs2_best.y2_hat;
-end
-
-sim_case = '0';
-plot_best_obs_residue(t_best, y_best, y_hat_best, sim_case, r1_limit, ...
-    r2_limit, [t_best(1) t_best(ceil(length(t_best)/2)), -r1_limit*1.1, ...
-    r1_limit*1.1], [t_best(1) t_best(ceil(length(t_best)/2)), -r2_limit*1.1, ...
-    r2_limit*1.1], b_filter, a_filter, true, ...
-    './figs/residue/residue1_limiar_ex.png', ...
-    './figs/residue/residue2_limiar_ex.png');
-
-
-for sim_case = ['1', '2', '3']
-    plot_best_obs_residue(t_best, y_best, y_hat_best, sim_case, r1_limit, ...
-    r2_limit, 'auto', 'auto', b_filter, a_filter, true, ...
-    sprintf('./figs/residue/residue1_limiar_c%s.png', sim_case), ...
-    sprintf('./figs/residue/residue2_limiar_c%s.png', sim_case));
-end
+sim_case = '1';
+plot_best_obs_residue(t_best, y_best, y_hat_obsu_best, sim_case, r1_limit, r2_limit, [t_best(1) t_best(ceil(length(t_best)/2)), -r1_limit*1.1, r1_limit*1.1], [t_best(1) t_best(ceil(length(t_best)/2)), -r2_limit*1.1, r2_limit*1.1], b_filter, a_filter, false, '/tmp/tst', '/tmp/tst');
+plot_best_obs_residue(t_best, y_best, y_hat_obsu_best, sim_case, r1_limit, r2_limit, 'auto', 'auto', b_filter, a_filter, false, '/tmp/tst', '/tmp/tst');

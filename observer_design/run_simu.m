@@ -1,4 +1,4 @@
-function [t, x, y, x_hat_obs, y_hat_obs] = run_sim(sim_dir, sim_name)
+function [t, x, y, x_hat_obs, y_hat_obs] = run_simu(sim_dir, sim_name)
     % Para evitar criar slxc e slprj
     default_path = pwd;
     cd(sim_dir)
