@@ -1,7 +1,7 @@
 function [fig1, fig2] = plot_residue(t, y_luenberger, y_hat_obsu_luenberger, ...
     y1_hat_obs1_luenberger, y2_hat_obs2_luenberger, y_kalman, y_hat_obsu_kalman, ...
     y1_hat_obs1_kalman, y2_hat_obs2_kalman, sim_case, b_filter, a_filter, ... 
-    save, save_path1, save_path2)
+    plot_dmg_time, save, save_path1, save_path2)
 
     % Luenberger 
     r1_obsu_luenberger = filter(b_filter, a_filter, (y_luenberger.y1 - y_hat_obsu_luenberger.y1_hat));
@@ -29,11 +29,16 @@ function [fig1, fig2] = plot_residue(t, y_luenberger, y_hat_obsu_luenberger, ...
     plot(t, r1_obs1_luenberger, 'Color', '#84A98C', 'DisplayName', 'Luenberger banco de observadores')
     plot(t, r1_obsu_kalman, 'Color', '#A31621', 'DisplayName', 'Kalman observador unico')
     plot(t, r1_obs1_kalman, 'Color', '#F37748', 'DisplayName', 'Kalman banco de observadores')
-    % xline(t(end)/2, 'k--', 'LineWidth', 2)
-    xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
+    
+    if plot_dmg_time
+        % xline(t(end)/2, 'k--', 'LineWidth', 2)
+        xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
+        annotation('textarrow', [0.3, 0.5175], [0.8, 0.775], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
+    end
     ylabel('r_1(t) (m)')
     xlabel('t (s)')
     % xlim([t(1), t(end)])
+    xticks(t(1):5:t(end))  % Se nao ele coloca de 10 em 10
     axis([t(1) t(end) 1.1*min(min([r1_obsu_luenberger, r1_obs1_luenberger, r1_obsu_kalman, r1_obs1_kalman])) 1.1*max(max([r1_obsu_luenberger, r1_obs1_luenberger, r1_obsu_kalman, r1_obs1_kalman]))])
     % legend('Location', 'northwest')
     % legend('Location', 'northwest', 'FontSize', 14)
@@ -53,24 +58,28 @@ function [fig1, fig2] = plot_residue(t, y_luenberger, y_hat_obsu_luenberger, ...
         fig2 = figure;
     end
     hold on
-    % plot(t, r2_obsu_luenberger, 'Color', '#053C5E', 'DisplayName', 'Luenberger observador unico')
-    % plot(t, r2_obs2_luenberger, 'Color', '#1F7A8C', 'DisplayName', 'Luenberger banco de observadores')
-    % plot(t, r2_obsu_kalman, 'Color', '#A31621', 'DisplayName', 'Kalman observador unico')
-    % plot(t, r2_obs2_kalman, 'Color', '#F37748', 'DisplayName', 'Kalman banco de observadores')
-    plot(t, r2_obsu_luenberger, 'Color', '#053C5E')
-    plot(t, r2_obs2_luenberger, 'Color', '#84A98C')
-    plot(t, r2_obsu_kalman, 'Color', '#A31621')
-    plot(t, r2_obs2_kalman, 'Color', '#F37748')  
+    plot(t, r2_obsu_luenberger, 'Color', '#053C5E', 'DisplayName', 'LU')
+    plot(t, r2_obs2_luenberger, 'Color', '#1F7A8C', 'DisplayName', 'LB')
+    plot(t, r2_obsu_kalman, 'Color', '#A31621', 'DisplayName', 'KU')
+    plot(t, r2_obs2_kalman, 'Color', '#F37748', 'DisplayName', 'KB')
+    % plot(t, r2_obsu_luenberger, 'Color', '#053C5E')
+    % plot(t, r2_obs2_luenberger, 'Color', '#84A98C')
+    % plot(t, r2_obsu_kalman, 'Color', '#A31621')
+    % plot(t, r2_obs2_kalman, 'Color', '#F37748')  
     ylabel('r_2(t) (m/s^2)')
     xlabel('t (s)')
-    % xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
-    xline(t(end)/2, 'k--', 'LineWidth', 2)
+    if plot_dmg_time
+        % xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
+        xline(t(end)/2, 'k--', 'LineWidth', 2, 'HandleVisibility','off')
+        annotation('textarrow', [0.25, 0.45], [0.8, 0.775], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
+    end
     % xlim([t(1), t(end)])
+    xticks(t(1):5:t(end))  % Se nao ele coloca de 10 em 10
     axis([t(1) t(end) 1.1*min(min([r2_obsu_luenberger, r2_obs2_luenberger, r2_obsu_kalman, r2_obs2_kalman])) 1.1*max(max([r2_obsu_luenberger, r2_obs2_luenberger, r2_obsu_kalman, r2_obs2_kalman]))])
+    legend('Location', 'northeastoutside')
+    % legend('Location', 'northeast')
     grid on
     box on
-    % legend('Location', 'northeastoutside')
-    % legend('Location', 'northeast')
     if ~save
         title(sprintf('Residuo 2 para caso %s', sim_case));
     end

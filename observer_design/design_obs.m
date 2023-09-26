@@ -116,8 +116,9 @@ for n_mul = real_space
         end
     end
 end
-fprintf('Melhor matriz de ganho:');
-disp(Ko_best)
+fprintf('Melhor matriz de ganho:\n');
+% disp(Ko_best)
+disp(Ko_best(:,1)); disp(Ko_best(:,2))
 fprintf('Limiar r1:')
 disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
 fprintf('Limiar r2:')
@@ -168,7 +169,7 @@ for n_mul = real_space
         end
     end
 end
-fprintf('Melhor matriz de ganho:');
+fprintf('Melhor matriz de ganho:\n');
 disp(Ko_best)
 fprintf('Limiar r1:')
 disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
@@ -218,7 +219,7 @@ for n_mul = real_space
         end
     end
 end
-fprintf('Melhor matriz de ganho:');
+fprintf('Melhor matriz de ganho:\n');
 disp(Ko_best)
 fprintf('Limiar r2:')
 disp(1.5*max(abs(r2_obs_best(1:ceil(length(r2_obs)/2)))));
@@ -281,8 +282,9 @@ for n_mul = real_space
         end
     end
 end
-fprintf('Melhor matriz de ganho:');
-disp(Ko_best)
+fprintf('Melhor matriz de ganho:\n');
+% disp(Ko_best)
+disp(Ko_best(:,1)); disp(Ko_best(:,2))
 fprintf('Limiar r1:')
 disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
 fprintf('Limiar r2:')
@@ -333,7 +335,7 @@ for n_mul = real_space
         end
     end
 end
-fprintf('Melhor matriz de ganho:');
+fprintf('Melhor matriz de ganho:\n');
 disp(Ko_best)
 fprintf('Limiar r1:')
 disp(1.5*max(abs(r1_obs_best(1:ceil(length(r1_obs)/2)))));
@@ -383,7 +385,7 @@ for n_mul = real_space
         end
     end
 end
-fprintf('Melhor matriz de ganho:');
+fprintf('Melhor matriz de ganho:\n');
 disp(Ko_best)
 fprintf('Limiar r2:')
 disp(1.5*max(abs(r2_obs_best(1:ceil(length(r2_obs)/2)))));
