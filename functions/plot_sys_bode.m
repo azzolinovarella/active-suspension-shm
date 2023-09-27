@@ -25,7 +25,7 @@ function [fig1, fig2] = plot_sys_bode(sys_hlt, sys_dmg, sim_case, f1, f2, ylimit
     % xlabel('f (Hz)')
     grid on
     box on
-    ylabel('|Y_1(j\Omega)|(dB)')
+    ylabel('|Y_1(j\Omega)| (dB)')
     axis(ylimits1)
     if ~save, title(['Comparaçao do ganho 1 para sistema com dano do tipo ', sim_case]); legend('Saudavel', sprintf('Situacao de dano %s', sim_case)); end
     if save && exist('save_path1', 'var'); save_fig(fig1, save_path1); end

@@ -1,4 +1,4 @@
-function fig = plot_noise(t, v, limits, signal_ref, unit_ref, save, save_path)
+function fig = plot_noise(t, v, limits, signal_ref, unit_ref, noise_ref, save, save_path)
     if save && exist('save_path', 'var')
         fig = figure('visible', 'off');
     else
@@ -7,7 +7,7 @@ function fig = plot_noise(t, v, limits, signal_ref, unit_ref, save, save_path)
 
     plot(t, v);
     if ~save, title(['Ruído adicionado a y_', signal_ref, '(t)']); end
-    ylabel(['v_', signal_ref, '(t) (', unit_ref, ')']);
+    ylabel([noise_ref, signal_ref, '(t) (', unit_ref, ')']);
     xlabel('t (s)')
     grid on
     box on
