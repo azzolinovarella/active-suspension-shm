@@ -7,7 +7,7 @@ function fig = plot_noise(t, v, limits, signal_ref, unit_ref, noise_ref, save, s
 
     plot(t, v);
     if ~save, title(['Ruído adicionado a y_', signal_ref, '(t)']); end
-    ylabel([noise_ref, signal_ref, '(t) (', unit_ref, ')']);
+    ylabel(sprintf('%s_%s(t) (%s)', noise_ref, signal_ref, unit_ref));
     xlabel('t (s)')
     grid on
     box on

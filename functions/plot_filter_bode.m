@@ -10,6 +10,7 @@ function [fig1, fig2] = plot_filter_bode(w_filter, H_filter, f_sr, limits1, limi
     hold on
     %%% Usando w
     semilogx(w_arr, 20*log10(abs(H_filter)))
+    % hold on
     xlabel('\Omega (rad/s)')
     %%% Usando f
     % semilogx(f_arr, 20*log10(abs(H)))
@@ -28,6 +29,7 @@ function [fig1, fig2] = plot_filter_bode(w_filter, H_filter, f_sr, limits1, limi
     hold on
     %%% Usando w
     semilogx(w_arr, rad2deg(angle(H_filter)))
+    % hold on
     xlabel('\Omega (rad/s)')
     %%% Usando f
     % semilogx(f_arr, angle(H))

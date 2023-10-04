@@ -33,6 +33,7 @@ function [fig1, fig2] = plot_residue(t, y_luenberger, y_hat_obsu_luenberger, ...
     if plot_dmg_time
         % xline(t(end)/2, 'k--', 'LineWidth', 2)
         xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
+        % annotation('textarrow', [0.3, 0.5175], [0.775, 0.75], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
         annotation('textarrow', [0.3, 0.5175], [0.8, 0.775], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
     end
     ylabel('r_1(t) (m)')
@@ -71,6 +72,7 @@ function [fig1, fig2] = plot_residue(t, y_luenberger, y_hat_obsu_luenberger, ...
     if plot_dmg_time
         % xline(t(end)/2, 'k--', 'LineWidth', 2, 'DisplayName', 'Momento do dano')
         xline(t(end)/2, 'k--', 'LineWidth', 2, 'HandleVisibility','off')
+        % annotation('textarrow', [0.25, 0.45], [0.775, 0.75], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
         annotation('textarrow', [0.25, 0.45], [0.8, 0.775], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
     end
     % xlim([t(1), t(end)])

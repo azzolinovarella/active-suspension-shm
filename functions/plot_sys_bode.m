@@ -14,9 +14,10 @@ function [fig1, fig2] = plot_sys_bode(sys_hlt, sys_dmg, sim_case, f1, f2, ylimit
     else
         fig1 = figure;
     end
-    hold on
+    % hold on
     %%% Usando w
     semilogx(wout_hlt, y1_hlt_bode)
+    hold on
     semilogx(wout_dmg, y1_dmg_bode)
     xlabel('\Omega (rad/s)')
     %%% Usando f
@@ -35,9 +36,10 @@ function [fig1, fig2] = plot_sys_bode(sys_hlt, sys_dmg, sim_case, f1, f2, ylimit
     else
         fig2 = figure;
     end
-    hold on
+    % hold on
     %%% Usando w
     semilogx(wout_hlt, y2_hlt_bode)
+    hold on
     semilogx(wout_dmg, y2_dmg_bode)
     xlabel('\Omega (rad/s)')
     %%% Usando f

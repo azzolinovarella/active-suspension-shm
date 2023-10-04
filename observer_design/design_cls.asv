@@ -1,6 +1,5 @@
 clear; close all; clc
 
-rng(0)  % Seed para termos reprodutibilidade
 reset(0)
 
 %% Parametros da simulaçao
@@ -10,8 +9,6 @@ f_sr = 1/dt;
 T = 32;  % Deve ser par
 CI = [0; 0; 0; 0];
 [b_filter, a_filter] = butter(2, 75/(f_sr*pi), 'low');   % wc = 25 + wn2 (padrao)
-% f_mult = 1.5;
-f_mult = 1.375;  % Fator de multiplicaçao do maximo absoluto
 
 %% Geraçao do sinal de chirp e ruido
 
@@ -76,8 +73,8 @@ r2_obs = filter(b_filter, a_filter, (y.y2 - y_hat_obs.y2_hat));
 
 fprintf('Melhor matriz de ganho:\n');
 fprintf('\n%.2d\t%.2d', Ko(:, 1), Ko(:, 2))
-fprintf('\n\nLimiar r1: %.2d', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
-fprintf('\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('\n\nLimiar r1: %.2d', 1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('\nLimiar r2: %.2d\n\n', 1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
 
 %% Observador LUENBERGER 1 com entrada w
 
@@ -101,7 +98,7 @@ r1_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
 
 fprintf('Melhor matriz de ganho:\n');
 fprintf('\n%.2d', Ko)
-fprintf('\n\nLimiar r1: %.2d\n\n', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('\n\nLimiar r1: %.2d\n\n', 1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
 
 %% Observador LUENBERGER 2 com entrada w
 
@@ -125,7 +122,7 @@ r2_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
 
 fprintf('Melhor matriz de ganho:\n');
 fprintf('\n%.2d', Ko)
-fprintf('\n\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('\n\nLimiar r2: %.2d\n\n', 1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
 
 %% Observador LUENBERGER unico com entrada u
 
@@ -152,8 +149,8 @@ r2_obs = filter(b_filter, a_filter, (y.y2 - y_hat_obs.y2_hat));
 
 fprintf('Melhor matriz de ganho:\n');
 fprintf('\n%.2d\t%.2d', Ko(:, 1), Ko(:, 2))
-fprintf('\n\nLimiar r1: %.2d', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
-fprintf('\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('\n\nLimiar r1: %.2d', 1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('\nLimiar r2: %.2d\n\n', 1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
 
 %% Observador LUENBERGER 1 com entrada u
 
@@ -178,7 +175,7 @@ r1_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
 
 fprintf('Melhor matriz de ganho:\n');
 fprintf('\n%.2d', Ko)
-fprintf('\n\nLimiar r1: %.2d\n\n', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('\n\nLimiar r1: %.2d\n\n', 1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
 
 %% Observador LUENBERGER 2 com entrada u
 
@@ -203,7 +200,7 @@ r2_obs = filter(b_filter, a_filter, (y.yi - y_hat_obs.yi_hat));
 
 fprintf('Melhor matriz de ganho:\n');
 fprintf('\n%.2d', Ko)
-fprintf('\n\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('\n\nLimiar r2: %.2d\n\n', 1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
 
 %% Observador KALMAN - TODOS
 
@@ -231,8 +228,6 @@ v_var_y2_u = cov(v_y2_u);
 V_u = cov(v_y1_u, v_y2_u); 
 
 %%% Kalman - MUDA CONFORME O RUIDO DE SAIDA MUDA!
-load('../data/process_noise_u_data.mat')
-U = cov(wt_u.Data);
 %%%% Entrada w
 %%%%% Banco de Observadores
 [Ko1_kalman_w, ~, ~] = lqe(A, B1, C_obs1, W, v_var_y1_w);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
@@ -241,32 +236,38 @@ U = cov(wt_u.Data);
 [Kou_kalman_w, ~, ~] = lqe(A, B1, C, W, V_w);  % Agora eh V porque tem a matriz de covariancia...
 %%%% Entrada u
 % %%%%% Banco de Observadores
-[Ko1_kalman_u, ~, ~] = lqe(A, eye(4), C_obs1, U, v_var_y1_u);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
-[Ko2_kalman_u, ~, ~] = lqe(A, eye(4), C_obs2, U, v_var_y2_u);  % Idem
+% [Ko1_kalman_u, ~, ~] = lqe(A, B1, C_obs1, U, v_var_y1_u);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
+% [Ko2_kalman_u, ~, ~] = lqe(A, B1, C_obs2, U, v_var_y2_u);  % Idem
+[Ko1_kalman_u, ~, ~] = lqe(A, B2, C_obs1, 0, v_var_y1_u);  % Tem que ser v_var_y1 porque eh da saida 1 apenas
+[Ko2_kalman_u, ~, ~] = lqe(A, B2, C_obs2, 0, v_var_y2_u);  % Idem
 % %%%%% Observador unico
-[Kou_kalman_u, ~, ~] = lqe(A, eye(4), C, U, V_u);  % Agora eh V porque tem a matriz de covariancia...
+% [Kou_kalman_u, ~, ~] = lqe(A, B1, C, U, V_u);  % Agora eh V porque tem a matriz de covariancia...
+[Kou_kalman_u, ~, ~] = lqe(A, B2, C, 0, V_u);  % Agora eh V porque tem a matriz de covariancia...
 
 [~, ~, y, ~, ~, ~, y_hat_obsu, y1_hat_obs1, y2_hat_obs2] = run_sim('.', 'kalman_w_');
 
 fprintf('OBSERVADOR KALMAN UNICO COM ENTRADA w(t)\n');
 r1_obs = filter(b_filter, a_filter, (y.y1 - y_hat_obsu.y1_hat));
 r2_obs = filter(b_filter, a_filter, (y.y2 - y_hat_obsu.y2_hat));
-fprintf('Melhor matriz de ganho:\n');
-fprintf('\n%.2d \t %.2d', Kou_kalman_w(:,1), Kou_kalman_w(:,2))
-fprintf('\n\nLimiar r1: %.2d', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
-fprintf('\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('Melhor matriz de ganho:');
+fprintf('%.2d \t %.2d', Kou_kalman_w(:,1), Kou_kalman_w(:,2))
+fprintf('\n\nLimiar r1: %.2d', 1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('\nLimiar r2: %.2d\n\n', 1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
 
 fprintf('OBSERVADOR KALMAN 1 COM ENTRADA w(t)\n');
 r1_obs = filter(b_filter, a_filter, (y.y1 - y1_hat_obs1.y1_hat));
-fprintf('Melhor matriz de ganho:\n');
-fprintf('\n%.2d', Ko1_kalman_w)
-fprintf('\n\nLimiar r1: %.2d\n\n', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('Melhor matriz de ganho:');
+fprintf('%.2d', Kou_kalman_w(:,1), Kou_kalman_w(:,2))
+fprintf('\n\nLimiar r1: %.2d', 1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('\nLimiar r2: %.2d\n\n', 1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
 
 fprintf('OBSERVADOR KALMAN 2 COM ENTRADA w(t)\n');
 r2_obs = filter(b_filter, a_filter, (y.y2 - y2_hat_obs2.y2_hat));
-fprintf('Melhor matriz de ganho:\n');
-fprintf('\n%.2d', Ko2_kalman_w)
-fprintf('\n\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('Melhor matriz de ganho:');
+disp(Ko2_kalman_w)
+fprintf('Limiar r2:')
+disp(1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))));
+fprintf('\n\n')
 
 % ------------------------------------------------------------------
 
@@ -275,19 +276,26 @@ fprintf('\n\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2
 fprintf('OBSERVADOR KALMAN UNICO COM ENTRADA u(t)\n');
 r1_obs = filter(b_filter, a_filter, (y.y1 - y_hat_obsu.y1_hat));
 r2_obs = filter(b_filter, a_filter, (y.y2 - y_hat_obsu.y2_hat));
-fprintf('Melhor matriz de ganho:\n');
-fprintf('\n%.2d \t %.2d', Kou_kalman_u(:,1), Kou_kalman_u(:,2))
-fprintf('\n\nLimiar r1: %.2d', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
-fprintf('\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('Melhor matriz de ganho:');
+disp(Kou_kalman_u)
+fprintf('Limiar r1:')
+disp(1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))));
+fprintf('Limiar r2:')
+disp(1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))));
+fprintf('\n\n')
 
 fprintf('OBSERVADOR KALMAN 1 COM ENTRADA u(t)\n');
 r1_obs = filter(b_filter, a_filter, (y.y1 - y1_hat_obs1.y1_hat));
-fprintf('Melhor matriz de ganho:\n');
-fprintf('\n%.2d', Ko1_kalman_u)
-fprintf('\n\nLimiar r1: %.2d\n\n', f_mult*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))))
+fprintf('Melhor matriz de ganho:');
+disp(Ko1_kalman_u)
+fprintf('Limiar r1:')
+disp(1.5*max(abs(r1_obs(1:ceil(length(r1_obs)/2)))));
+fprintf('\n\n')
 
 fprintf('OBSERVADOR KALMAN 2 COM ENTRADA u(t)\n');
 r2_obs = filter(b_filter, a_filter, (y.y2 - y2_hat_obs2.y2_hat));
-fprintf('Melhor matriz de ganho:\n');
-fprintf('\n%.2d', Ko2_kalman_u)
-fprintf('\n\nLimiar r2: %.2d\n\n', f_mult*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))))
+fprintf('Melhor matriz de ganho:');
+disp(Ko2_kalman_u)
+fprintf('Limiar r2:')
+disp(1.5*max(abs(r2_obs(1:ceil(length(r2_obs)/2)))));
+fprintf('\n\n')

@@ -7,46 +7,24 @@ function [fig1, fig2, fig3, fig4] = plot_sys_bode_var(mv, ks, bs, mr, kp, bp, ..
     else
         fig1 = figure;
     end
-    xlabel('\Omega (rad/s)')
-    ylabel('|Y_1(\Omega)/\omega(\Omega)| (dB)')
-    grid on
-    box on
-    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end  
 
     if save
         fig2 = figure('Visible', 'off');
     else
         fig2 = figure;
     end
-    xlabel('\Omega (rad/s)')
-    ylabel('|Y_2(\Omega)/\omega(\Omega)| (dB)')
-    grid on
-    box on
-    legend('Location', 'northeastoutside')
-    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end 
 
     if save
         fig3 = figure('Visible', 'off');
     else
         fig3 = figure;
     end
-    xlabel('\Omega (rad/s)')
-    ylabel('|Y_1(\Omega)/U(\Omega)| (dB)')
-    grid on
-    box on
-    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end 
 
     if save
         fig4 = figure('Visible', 'off');
     else
         fig4 = figure;
     end
-    xlabel('\Omega (rad/s)')
-    ylabel('|Y_2(\Omega)/U(\Omega)| (dB)')
-    grid on
-    box on
-    legend('Location', 'northeastoutside')
-    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end
 
     for i = 1:length(percentual_range)
         percentual_decrease = percentual_range(i);
@@ -97,10 +75,39 @@ function [fig1, fig2, fig3, fig4] = plot_sys_bode_var(mv, ks, bs, mr, kp, bp, ..
         semilogx(wout_u, y2_u_bode, 'Color', color, 'DisplayName', sprintf('%0.f%%', 100*percentual_decrease))
     end
     
-    set(0, 'CurrentFigure', fig1); axis(limits1)
-    set(0, 'CurrentFigure', fig2); axis(limits2)
-    set(0, 'CurrentFigure', fig3); axis(limits3)
-    set(0, 'CurrentFigure', fig4); axis(limits4)
+    set(0, 'CurrentFigure', fig1)
+    xlabel('\Omega (rad/s)')
+    ylabel('|Y_1(\Omega)/\omega(\Omega)| (dB)')
+    grid on
+    box on
+    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end  
+    axis(limits1)
+
+    set(0, 'CurrentFigure', fig2) 
+    xlabel('\Omega (rad/s)')
+    ylabel('|Y_2(\Omega)/\omega(\Omega)| (dB)')
+    grid on
+    box on
+    legend('Location', 'northeastoutside')
+    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end 
+    axis(limits2)
+
+    set(0, 'CurrentFigure', fig3)
+    xlabel('\Omega (rad/s)')
+    ylabel('|Y_1(\Omega)/U(\Omega)| (dB)')
+    grid on
+    box on
+    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end 
+    axis(limits3)
+
+    set(0, 'CurrentFigure', fig4)
+    xlabel('\Omega (rad/s)')
+    ylabel('|Y_2(\Omega)/U(\Omega)| (dB)')
+    grid on
+    box on
+    legend('Location', 'northeastoutside')
+    if ~save, title(sprintf('Variaçao de %s', variable_parameter)); end
+    axis(limits4)
 
     if save && exist('save_path1', 'var'); save_fig(fig1, save_path1); end
     if save && exist('save_path2', 'var'); save_fig(fig2, save_path2); end
