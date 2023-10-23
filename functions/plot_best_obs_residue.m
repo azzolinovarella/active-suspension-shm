@@ -22,6 +22,10 @@ function [fig1, fig2] = plot_best_obs_residue(t, y_real, y_hat, sim_case, ...
     end
     ylabel('r_1(t) (m)')
     xlabel('t (s)')
+    % Para corrigir os eixos e ficar mais bonito (multiplos de 5E?)
+    y_max = round(max(abs([r1; r1_limit]))/5, 1, 'significant')*5;
+    yticks(linspace(-2*y_max, 2*y_max, 11))
+    xticks(t(1):5:t(end))
     if class(limits1) == "string" && limits1 == "auto"
         axis([t(1) t(end) 1.1*min(r1) 1.1*max(r1)])
     else
@@ -59,6 +63,10 @@ function [fig1, fig2] = plot_best_obs_residue(t, y_real, y_hat, sim_case, ...
     end
     ylabel('r_2(t) (m/s^2)')
     xlabel('t (s)')
+    % Para corrigir os eixos e ficar mais bonito (multiplos de 5E?)
+    y_max = round(max(abs([r2; r2_limit]))/5, 1, 'significant')*5;
+    yticks(linspace(-2*y_max, 2*y_max, 11))
+    xticks(t(1):5:t(end))
     if class(limits2) == "string" && limits2 == "auto"
         axis([t(1) t(end) 1.1*min(r2) 1.1*max(r2)])
     else

@@ -20,7 +20,10 @@ function fig = plot_bad_obs_residue(t, y, y_hat_obs, b_filter, a_filter, ...
     ylabel('r_1(t) (m)')
     xlabel('t (s)')
     % xlim([t(1), t(end)])
-    xticks(t(1):5:t(end))  % Se nao ele coloca de 10 em 10
+    % Para corrigir os eixos e ficar mais bonito (multiplos de 5E?)
+    y_max = round(max(abs(r1))/5, 1, 'significant')*5;
+    yticks(linspace(-2*y_max, 2*y_max, 11))
+    xticks(t(1):5:t(end))
     axis([t(1) t(end) 1.1*min(r1) 1.1*max(r1)])
     % legend('Location', 'northwest')
     % legend('Location', 'northwest', 'FontSize', 14)
