@@ -44,6 +44,7 @@ function fig = run_simu(sim_dir, sim_name, r_mul, i_mul, b_filter, a_filter)
     xlabel('t (s)')
     xline(t(end)/2, 'k--', 'LineWidth', 2)
     xlim([t(1), t(end)])
+    % annotation('textarrow', [0.3, 0.5175], [0.8, 0.775], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
     hold off
     
     subplot(1, 2, 2)
@@ -57,6 +58,7 @@ function fig = run_simu(sim_dir, sim_name, r_mul, i_mul, b_filter, a_filter)
     xlabel('t (s)')
     xline(t(end)/2, 'k--', 'LineWidth', 2)
     xlim([t(1), t(end)])
+    % annotation('textarrow', [0.3, 0.5175], [0.8, 0.775], 'String', sprintf('Momento\ndo dano '), 'FontSize', 14, 'FontName', 'Latin Modern Math')
     hold off
 
     fprintf('Velocidades: %.2f & %.2f \nLimiares: %.2d & %.2d', r_mul, i_mul, L1, L2)
