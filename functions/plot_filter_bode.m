@@ -17,7 +17,7 @@ function [fig1, fig2] = plot_filter_bode(w_filter, H_filter, f_sr, limits1, limi
     % xlabel('f (Hz)')
     grid on
     box on
-    ylabel('Magnitude(dB)')
+    ylabel('Magnitude (dB)')
     axis(limits1)
     if save && exist('save_path1', 'var'); save_fig(fig1, save_path1); end
 
